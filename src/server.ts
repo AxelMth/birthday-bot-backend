@@ -6,6 +6,7 @@ import { BirthdayService } from './application/services/birthday.service';
 import { WhatsappBirthdayMessageRepository } from './infrastructure/repositories/whatsapp-birthday-message.repository';
 import { BirthdayController } from './presentation/controllers/birthday.controller';
 import { PersonController } from './presentation/controllers/person.controller';
+import { PersonService } from './application/services/person.service';
 
 export class Server {
   private app = express();
@@ -32,8 +33,10 @@ export class Server {
       notionPersonRepository,
       whatsappBirthdayMessageRepository
     );
+    const personService = new PersonService(notionPersonRepository);
+
     const birthdayController = new BirthdayController(birthdayService);
-    const personController = new PersonController(notionPersonRepository);
+    const personController = new PersonController(personService);
 
     this.app.get('/health', (_: Request, res: Response) => {
       res.send({
