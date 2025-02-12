@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { NotionPersonRepository } from './infrastructure/repositories/notion-person.repository';
+import { DatabasePersonRepository } from './infrastructure/repositories/database-person.repository';
 import { BirthdayService } from './application/services/birthday.service';
 import { WhatsappBirthdayMessageRepository } from './infrastructure/repositories/whatsapp-birthday-message.repository';
 import { BirthdayController } from './presentation/controllers/birthday.controller';
@@ -25,15 +25,15 @@ export class Server {
   }
 
   private setupRoutes(): void {
-    const notionPersonRepository = new NotionPersonRepository();
+    const databasePersonRepository = new DatabasePersonRepository();
     const whatsappBirthdayMessageRepository =
       new WhatsappBirthdayMessageRepository();
 
     const birthdayService = new BirthdayService(
-      notionPersonRepository,
+      databasePersonRepository,
       whatsappBirthdayMessageRepository
     );
-    const personService = new PersonService(notionPersonRepository);
+    const personService = new PersonService(databasePersonRepository);
 
     const birthdayController = new BirthdayController(birthdayService);
     const personController = new PersonController(personService);
