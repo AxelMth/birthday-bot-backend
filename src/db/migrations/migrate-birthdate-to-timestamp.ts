@@ -12,6 +12,7 @@ async function main() {
     for (const user of users) {
       const [date, month, year] = user.birthDate.split('/').map(Number); 
       await db.update(usersTable).set({
+        // @ts-expect-error At the time of writing, the schema did not have birthDateAsDate column
         birthDateAsDate: `${year}-${month}-${date}`,
       }).where(eq(usersTable.id, user.id));
     }

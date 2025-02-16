@@ -3,7 +3,7 @@ import { db } from '../../db';
 import { usersTable } from '../../db/schema';
 import { Person } from '../../domain/entities/person';
 import { DatabaseUserAdapter } from '../adapters/database-user.adapter';
-import { like } from 'drizzle-orm';
+import { sql } from 'drizzle-orm';
 
 export class DatabaseUserRepository implements PersonRepository {
   async getPeople(): Promise<Person[]> {
@@ -14,13 +14,11 @@ export class DatabaseUserRepository implements PersonRepository {
   async getPeopleByBirthday(date: Date): Promise<Person[]> {
     const day = date.getDate();
     const month = date.getMonth() + 1;
-    const dateString = `${day}/${month < 10 ? `0${month}` : month}`;
     const users = await db
-      .select()
-      .from(usersTable)
-      .where(like(usersTable.birthDate, `${dateString}%`))
+    .select()
+    .from(usersTable)
+    .where(sql`date_part('day', "birthDate") = ${day} and date_part('month', "birthDate") = ${month}`)
       .execute();
-
     return users.map(DatabaseUserAdapter.toDomain);
   }
 }
