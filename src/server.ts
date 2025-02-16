@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { DatabasePersonRepository } from './infrastructure/repositories/database-person.repository';
+import { DatabaseUserRepository } from './infrastructure/repositories/database-user.repository';
 import { BirthdayService } from './application/services/birthday.service';
 import { WhatsappBirthdayMessageRepository } from './infrastructure/repositories/whatsapp-birthday-message.repository';
 import { BirthdayController } from './presentation/controllers/birthday.controller';
@@ -24,7 +24,7 @@ export class Server {
   }
 
   private setupRoutes(): void {
-    const databasePersonRepository = new DatabasePersonRepository();
+    const databasePersonRepository = new DatabaseUserRepository();
     const whatsappBirthdayMessageRepository =
       new WhatsappBirthdayMessageRepository();
 

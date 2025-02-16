@@ -10,8 +10,9 @@ export class BirthdayController {
 
   async sendTodayBirthdayMessages(req: Request, res: Response): Promise<void> {
     try {
-      const people = await this.peopleService.getPeople();
-      await this.birthdayService.sendTodayBirthdayMessages(people);
+      const today = new Date();
+      const people = await this.peopleService.getPeopleByBirthday(today);
+      await this.birthdayService.sendTodayBirthdayMessages(people)
       res.status(200).json(people);
     } catch (error) {
       if (error instanceof Error) {

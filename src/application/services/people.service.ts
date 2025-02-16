@@ -8,4 +8,8 @@ export class PeopleService implements PeopleUseCase {
   async getPeople(): Promise<Person[]> {
     return this.personRepository.getPeople();
   }
+
+  async getPeopleByBirthday(date: Date): Promise<Person[]> {
+    return this.personRepository.getPeopleByBirthday(date);
+  }
 }
