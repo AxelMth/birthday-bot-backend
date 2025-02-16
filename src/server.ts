@@ -1,9 +1,11 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import "dotenv/config";
+
 import { DatabaseUserRepository } from './infrastructure/repositories/database-user.repository';
 import { BirthdayService } from './application/services/birthday.service';
-import { WhatsappBirthdayMessageRepository } from './infrastructure/repositories/whatsapp-birthday-message.repository';
+import { SlackBirthdayMessageRepository } from './infrastructure/repositories/slack-birthday-message.repository';
 import { BirthdayController } from './presentation/controllers/birthday.controller';
 import { DatabaseCommunicationRepository } from './infrastructure/repositories/database-communication.repository';
 
@@ -26,11 +28,13 @@ export class Server {
   private setupRoutes(): void {
     const databasePersonRepository = new DatabaseUserRepository();
     const databaseCommunicationRepository = new DatabaseCommunicationRepository(); 
-    const whatsappBirthdayMessageRepository =
-      new WhatsappBirthdayMessageRepository();
+
+    const messageRepositoriesByApplication = {
+      slack: new SlackBirthdayMessageRepository(),
+    };
 
     const birthdayService = new BirthdayService(
-      whatsappBirthdayMessageRepository,
+      messageRepositoriesByApplication,
       databasePersonRepository,
       databaseCommunicationRepository ,
     );

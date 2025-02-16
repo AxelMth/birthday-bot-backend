@@ -32,7 +32,7 @@ devDependencies:
     specifier: ^5.0.0
     version: 5.0.0
   '@types/node':
-    specifier: ^22.10.2
+    specifier: ^22.13.4
     version: 22.13.4
   '@types/pg':
     specifier: ^8.11.11

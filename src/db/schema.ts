@@ -3,10 +3,6 @@ import { date, integer, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
 // Define enum for communication applications
 export const communicationAppEnum = pgEnum('communication_app', [
-  'whatsapp',
-  'messenger',
-  'email',
-  'sms',
   "slack",
 ]);
 

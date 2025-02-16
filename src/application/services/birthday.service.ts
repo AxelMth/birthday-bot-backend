@@ -3,12 +3,13 @@ import { BirthdayUseCase } from '../ports/input/birthday.use-case';
 import { BirthdayMessageRepository } from '../ports/output/message.repository';
 import { CommunicationRepository } from '../ports/output/communication.repository';
 import { PersonRepository } from '../ports/output/person.repository';
+import { Application } from '@/domain/value-objects/application';
 
 export class BirthdayService implements BirthdayUseCase {
   constructor(
-    private readonly birthdayMessageRepository: BirthdayMessageRepository,
+    private readonly messageRepositoriesByApplication: Record<Application, BirthdayMessageRepository>,
     private readonly personRepository: PersonRepository,
-    private readonly communicationRepository: CommunicationRepository,  
+    private readonly communicationRepository: CommunicationRepository,
   ) {}
 
   async sendTodayBirthdayMessages(): Promise<void> {
@@ -25,12 +26,14 @@ export class BirthdayService implements BirthdayUseCase {
         console.log(`No communications found for ${person.name}`);
         continue  
       }
-      console.log(`Found ${communications.length} communications for ${person.name}`  );
-
-      await this.birthdayMessageRepository.sendMessage(
-        person,
-        `Happy birthday, ${person.name}!`
-      );
+      for (const communication of communications) {
+        if (!this.messageRepositoriesByApplication[communication.application]) {
+          console.log(`No message repository found for ${communication.application}`);
+          continue;
+        }
+        const birthdayMessageRepository = this.messageRepositoriesByApplication[communication.application];
+        await birthdayMessageRepository.sendMessage(person, "Happy birthday!");
+      }
     }
   }
 }

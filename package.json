@@ -22,7 +22,7 @@
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
-    "@types/node": "^22.10.2",
+    "@types/node": "^22.13.4",
     "@types/pg": "^8.11.11",
     "cors": "^2.8.5",
     "drizzle-kit": "^0.30.4",
