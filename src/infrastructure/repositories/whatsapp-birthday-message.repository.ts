@@ -1,4 +1,4 @@
-import { BirthdayMessageRepository } from '@/application/ports/output/birthday-message.repository';
+import { BirthdayMessageRepository } from '@/application/ports/output/message.repository';
 import { Person } from '../../domain/entities/person';
 
 export class WhatsappBirthdayMessageRepository

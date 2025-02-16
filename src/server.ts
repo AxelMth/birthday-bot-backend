@@ -5,7 +5,7 @@ import { DatabaseUserRepository } from './infrastructure/repositories/database-u
 import { BirthdayService } from './application/services/birthday.service';
 import { WhatsappBirthdayMessageRepository } from './infrastructure/repositories/whatsapp-birthday-message.repository';
 import { BirthdayController } from './presentation/controllers/birthday.controller';
-import { PeopleService } from './application/services/people.service';
+import { DatabaseCommunicationRepository } from './infrastructure/repositories/database-communication.repository';
 
 export class Server {
   private app = express();
@@ -25,17 +25,18 @@ export class Server {
 
   private setupRoutes(): void {
     const databasePersonRepository = new DatabaseUserRepository();
+    const databaseCommunicationRepository = new DatabaseCommunicationRepository(); 
     const whatsappBirthdayMessageRepository =
       new WhatsappBirthdayMessageRepository();
 
-    const peopleService = new PeopleService(databasePersonRepository);
     const birthdayService = new BirthdayService(
-      whatsappBirthdayMessageRepository
+      whatsappBirthdayMessageRepository,
+      databasePersonRepository,
+      databaseCommunicationRepository ,
     );
 
     const birthdayController = new BirthdayController(
       birthdayService,
-      peopleService
     );
 
     this.app.get('/health', (_: Request, res: Response) => {
