@@ -1,11 +1,11 @@
 import { Person } from '@/domain/entities/person';
-import { PersonUseCase } from '../ports/input/person.use-case';
+import { PeopleUseCase } from '../ports/input/people.use-case';
 import { PersonRepository } from '../ports/output/person.repository';
 
-export class PersonService implements PersonUseCase {
+export class PeopleService implements PeopleUseCase {
   constructor(private readonly personRepository: PersonRepository) {}
 
-  async syncPeople(): Promise<Person[]> {
+  async getPeople(): Promise<Person[]> {
     return this.personRepository.getPeople();
   }
 }

@@ -1,3 +1,5 @@
+import { Person } from '../../../domain/entities/person';
+
 export interface BirthdayUseCase {
-  sendTodayBirthdayMessages(): Promise<void>;
+  sendTodayBirthdayMessages(people: Person[]): Promise<void>;
 }
