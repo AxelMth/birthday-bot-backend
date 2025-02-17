@@ -35,7 +35,7 @@ export class BirthdayService implements BirthdayUseCase {
         const metadata = await metadataRepository.getMetadataForCommunication(
           communication.id
         );
-        await messageRepository.sendMessage('Happy birthday!', metadata);
+        await messageRepository.sendMessage('Joyeux anniversaire ', metadata);
       }
     }
   }
