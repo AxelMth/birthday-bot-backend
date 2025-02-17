@@ -1,5 +1,5 @@
 import { Person } from '../../../domain/entities/person';
 
-export interface BirthdayMessageRepository {
-  sendMessage(person: Person, message: string): Promise<void>;
+export interface BirthdayMessageRepository<M = any> {
+  sendMessage(message: string, metadata: M): Promise<void>;
 }

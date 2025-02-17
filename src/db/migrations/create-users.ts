@@ -2,7 +2,7 @@ import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import fs from 'node:fs/promises';
 
-import { users } from '../schema';
+import { people } from '../schema';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -14,7 +14,7 @@ async function main() {
     if (!name || !birthDate) {
       continue;
     }
-    await db.insert(users).values({
+    await db.insert(people).values({
       name,
       birthDate,
     });

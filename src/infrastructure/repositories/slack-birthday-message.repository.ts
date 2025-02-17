@@ -1,21 +1,27 @@
 import axios from 'axios';
 
 import { BirthdayMessageRepository } from '@/application/ports/output/message.repository';
-import { Person } from '../../domain/entities/person';
+
+type SlackMetadata = {
+  channelId: string;
+  personId: string;
+};
 
 export class SlackBirthdayMessageRepository
-  implements BirthdayMessageRepository
+  implements BirthdayMessageRepository<SlackMetadata>
 {
-  async sendMessage(person: Person, message: string): Promise<void> {
-    console.log(`Sending slack message to ${person.name}: ${
-      message
-    }`);
-    const webhookUrl = process.env.SLACK_WEBHOOK_URL;
-    if (!webhookUrl) {
-      throw new Error('SLACK_WEBHOOK_URL is not set');
-    }
-    await axios.post(webhookUrl, {
-      text: message,
-    })
+  async sendMessage(message: string, metadata: SlackMetadata): Promise<void> {
+    const url = 'https://slack.com/api/chat.postMessage';
+    let data = JSON.stringify({
+      channel: metadata.channelId,
+      text: `${message} <@${metadata.personId}>`,
+    });
+
+    return axios.post(url, data, {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
+      },
+    });
   }
 }

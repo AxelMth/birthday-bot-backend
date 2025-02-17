@@ -3,12 +3,16 @@ import { Application } from '../../domain/value-objects/application';
 
 interface DatabaseCommunication {
   id: number;
-  userId: number;
+  personId: number;
   application: string;
 }
 
 export class DatabaseCommunicationAdapter {
-  static toDomain(communication: DatabaseCommunication): Communication  {
-    return new Communication(communication.id, communication.userId, communication.application as Application );
+  static toDomain(communication: DatabaseCommunication): Communication {
+    return new Communication(
+      communication.id,
+      communication.personId,
+      communication.application as Application
+    );
   }
 }
