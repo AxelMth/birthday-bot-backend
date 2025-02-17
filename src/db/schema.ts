@@ -28,16 +28,13 @@ export const contactMethods = pgTable('contact_methods', {
 
 export const slackMetadata = pgTable('slack_metadata', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  communicationId: integer()
+  contactMethodId: integer()
     .notNull()
     .references(() => contactMethods.id, {
       onDelete: 'cascade',
     }),
   channelId: varchar({ length: 255 }).notNull(),
   slackUserId: varchar({ length: 255 }).notNull(),
-  personId: integer()
-    .notNull()
-    .references(() => people.id, { onDelete: 'cascade' }),
 });
 
 export const groups = pgTable('groups', {

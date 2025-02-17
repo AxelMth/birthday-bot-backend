@@ -1,4 +1,3 @@
-// src/infrastructure/repositories/slack-metadata.repository.ts
 import { CommunicationMetadataRepository } from '@/application/ports/output/metadata.repository';
 import { SlackMetadata } from '@/domain/value-objects/communication-metadata';
 import { db } from '../../db';
@@ -14,7 +13,7 @@ export class SlackMetadataRepository
     const metadata = await db
       .select()
       .from(slackMetadata)
-      .where(eq(slackMetadata.communicationId, communicationId))
+      .where(eq(slackMetadata.contactMethodId, communicationId))
       .execute();
 
     if (!metadata[0]) {
