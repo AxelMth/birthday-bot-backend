@@ -4,6 +4,7 @@ import { CommunicationRepository } from '../ports/output/communication.repositor
 import { PersonRepository } from '../ports/output/person.repository';
 import { Application } from '@/domain/value-objects/application';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
+import { Person } from '@/domain/entities/person';
 
 export class BirthdayService implements BirthdayUseCase {
   constructor(
@@ -14,6 +15,10 @@ export class BirthdayService implements BirthdayUseCase {
     private readonly personRepository: PersonRepository,
     private readonly communicationRepository: CommunicationRepository
   ) {}
+
+  async getNextBirthdaysUntil(date: Date): Promise<Person[]> {
+    return this.personRepository.getPeopleByBirthdayRange(new Date(), date);
+  }
 
   async sendTodayBirthdayMessages(): Promise<void> {
     const people = await this.personRepository.getPeopleByBirthday(new Date());

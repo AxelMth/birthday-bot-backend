@@ -1,14 +1,15 @@
 import { Person } from '../../domain/entities/person';
 
-interface DatabaseUser {
+interface DatabasePerson {
   id: number;
   name: string;
   birthDate: string;
 }
 
-export class DatabaseUserAdapter {
-  static toDomain(user: DatabaseUser): Person {
+export class DatabasePersonAdapter {
+  static toDomain(user: DatabasePerson): Person {
     const [year, month, day] = user.birthDate.split('-').map(Number);
-    return new Person(user.id, user.name, new Date(year, month - 1, day));
+    const birthDate = new Date(Date.UTC(year, month - 1, day));
+    return new Person(user.id, user.name, birthDate);
   }
 }

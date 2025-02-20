@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
-import "dotenv/config";
+import 'dotenv/config';
 
 import { DatabaseUserRepository } from './infrastructure/repositories/database-user.repository';
 import { BirthdayService } from './application/services/birthday.service';
@@ -27,7 +27,8 @@ export class Server {
 
   private setupRoutes(): void {
     const databasePersonRepository = new DatabaseUserRepository();
-    const databaseCommunicationRepository = new DatabaseCommunicationRepository(); 
+    const databaseCommunicationRepository =
+      new DatabaseCommunicationRepository();
 
     const messageRepositoriesByApplication = {
       slack: new SlackBirthdayMessageRepository(),
@@ -36,12 +37,10 @@ export class Server {
     const birthdayService = new BirthdayService(
       messageRepositoriesByApplication,
       databasePersonRepository,
-      databaseCommunicationRepository ,
+      databaseCommunicationRepository
     );
 
-    const birthdayController = new BirthdayController(
-      birthdayService,
-    );
+    const birthdayController = new BirthdayController(birthdayService);
 
     this.app.get('/health', (_: Request, res: Response) => {
       res.send({
@@ -50,6 +49,9 @@ export class Server {
     });
     this.app.post('/api/birthday/send-messages', (req, res) =>
       birthdayController.sendTodayBirthdayMessages(req, res)
+    );
+    this.app.get('/api/birthday/next', (req, res) =>
+      birthdayController.getNextBirthdaysUntil(req, res)
     );
   }
 
