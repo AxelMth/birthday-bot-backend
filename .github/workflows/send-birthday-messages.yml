@@ -10,4 +10,4 @@ jobs:
     steps:
       - name: Send birthday messages
         run: |
-          curl --location --request POST '${{ secrets.BASE_URL }}/send-messages' --data ''
+          curl --location --request POST '${{ secrets.BASE_URL }}/api/birthday/send-messages' --data ''
