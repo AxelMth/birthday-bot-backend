@@ -2,6 +2,8 @@ name: Send Birthday Messages
 on:
   schedule:
     - cron: '0 8 * * *'
+  workflow_dispatch:
+
 jobs:
   send-birthday-messages:
     runs-on: ubuntu-latest
