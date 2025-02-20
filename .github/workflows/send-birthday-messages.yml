@@ -1,0 +1,11 @@
+name: Send Birthday Messages
+on:
+  schedule:
+    - cron: '0 8 * * *'
+jobs:
+  send-birthday-messages:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send birthday messages
+        run: |
+          curl --location --request POST '${{ secrets.BASE_URL }}/send-messages' --data ''
