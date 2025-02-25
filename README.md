@@ -40,17 +40,17 @@ Required environment variables:
 ### Development mode
 
 ```bash
-npm run dev
+pnpm run dev
 ```
 
 ### Build the application
 
 ```bash
-npm run build
+pnpm run build
 ```
 
 ### Start the production server
 
 ```bash
-npm start
+pnpm start
 ```
