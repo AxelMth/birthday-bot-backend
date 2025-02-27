@@ -26,7 +26,6 @@ export class BirthdayService implements BirthdayUseCase {
   }> {
     const people = await this.personRepository.getPeopleByBirthday(new Date());
     if (people.length === 0) {
-      console.log('No birthdays today');
       return {
         birthdayMessageCount: 0,
       };
