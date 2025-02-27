@@ -2,7 +2,10 @@ import { relations } from 'drizzle-orm';
 import { date, integer, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
 // Enums
-export const contactMethodAppEnum = pgEnum('contact_method_app', ['slack']);
+export const contactMethodAppEnum = pgEnum('contact_method_app', [
+  'slack',
+  'teams',
+]);
 
 export const groupTypeEnum = pgEnum('group_type', [
   'family',
