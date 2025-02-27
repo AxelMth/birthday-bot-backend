@@ -54,9 +54,6 @@ export const birthdayRouter = s.router(birthdayContract, {
   getNextBirthdays: async ({ query }) => {
     try {
       const date = new Date(query.date as string);
-      if (isNaN(date.getTime())) {
-        throw new Error('Invalid date');
-      }
       const people = await birthdayService.getNextBirthdaysUntil(date);
       return {
         status: 200,

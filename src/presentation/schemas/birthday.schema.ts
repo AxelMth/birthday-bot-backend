@@ -7,12 +7,7 @@ export const sendTodayBirthdayMessagesResponseSchema = z.object({
 });
 
 export const getNextBirthdaysUntilQuerySchema = z.object({
-  date: z.string().refine(
-    value => {
-      return new Date(value).toString() !== 'Invalid Date';
-    },
-    { message: 'Invalid date' }
-  ),
+  date: z.string().date(),
 });
 
 export const getNextBirthdaysUntilResponseSchema = z.object({
