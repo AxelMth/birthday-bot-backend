@@ -20,12 +20,18 @@ export class BirthdayService implements BirthdayUseCase {
     return this.personRepository.getPeopleByBirthdayRange(new Date(), date);
   }
 
-  async sendTodayBirthdayMessages(): Promise<void> {
+  async sendTodayBirthdayMessages(): Promise<{
+    birthdayMessageCount: number;
+    people?: Person[];
+  }> {
     const people = await this.personRepository.getPeopleByBirthday(new Date());
     if (people.length === 0) {
       console.log('No birthdays today');
-      return;
+      return {
+        birthdayMessageCount: 0,
+      };
     }
+    let birthdayMessageCount = 0;
     for (const person of people) {
       const communications = await this.communicationRepository.getByPersonId(
         person.id
@@ -41,7 +47,12 @@ export class BirthdayService implements BirthdayUseCase {
           communication.id
         );
         await messageRepository.sendMessage('Joyeux anniversaire ', metadata);
+        birthdayMessageCount++;
       }
     }
+    return {
+      birthdayMessageCount,
+      people,
+    };
   }
 }
