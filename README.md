@@ -80,3 +80,19 @@ pnpm start
         ├── controllers  # HTTP request handlers
         └── schemas      # Request/Response validation schemas
 ```
+
+# Launch local environement
+
+```bash
+docker-compose up -d
+```
+
+## Copy date from remote database into local one
+
+```bash
+pg_dump -h host -U user -d database > remote_dump.sql
+```
+
+```bash
+docker exec -i birthday-bot-postgresql psql -U root birthday-bot < remote_dump.sql
+```
