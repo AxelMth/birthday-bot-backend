@@ -2,10 +2,10 @@
   "name": "birthday-bot",
   "version": "1.0.0",
   "description": "",
-  "main": "src/index.js",
+  "main": "src/main.js",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
-    "start": "node dist/index.js",
+    "start": "node dist/main.js",
     "dev": "tsx watch src/main.ts"
   },
   "keywords": [],
