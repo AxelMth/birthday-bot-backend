@@ -1,6 +1,6 @@
 import { CommunicationRepository } from '@/application/ports/output/communication.repository';
 import { db } from '../../db';
-import { contactMethods, slackMetadata } from '../../db/schema';
+import { contactMethods } from '../../db/schema';
 import { eq } from 'drizzle-orm';
 import { DatabaseCommunicationAdapter } from '../adapters/database-communication.adapter';
 import { Communication } from '@/domain/entities/communication';

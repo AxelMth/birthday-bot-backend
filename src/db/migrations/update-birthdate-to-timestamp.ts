@@ -1,6 +1,5 @@
 import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
-import fs from 'node:fs/promises';
 
 import { people } from '../schema';
 import { eq } from 'drizzle-orm';
