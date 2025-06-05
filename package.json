@@ -9,13 +9,13 @@
     "dev": "tsx watch src/main.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Axel Mathieu",
   "license": "ISC",
   "dependencies": {
     "@ts-rest/core": "^3.52.0",
     "@ts-rest/express": "^3.52.0",
     "axios": "^1.7.9",
-    "birthday-bot-contracts": "^0.1.6",
+    "birthday-bot-contracts": "^0.1.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
