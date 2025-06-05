@@ -1,5 +1,6 @@
 import { initServer } from '@ts-rest/express';
-import { birthdayContract } from './presentation/contracts/birthday.contract';
+import { birthdayContract } from 'birthday-bot-contracts';
+
 import { DatabaseUserRepository } from './infrastructure/repositories/database-user.repository';
 import { DatabaseCommunicationRepository } from './infrastructure/repositories/database-communication.repository';
 import { SlackBirthdayMessageRepository } from './infrastructure/repositories/slack-birthday-message.repository';

@@ -2,10 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import 'dotenv/config';
+import { createExpressEndpoints } from '@ts-rest/express';
+import { birthdayContract } from 'birthday-bot-contracts';
 
-import { createExpressEndpoints, initServer } from '@ts-rest/express';
 import { birthdayRouter } from './router';
-import { birthdayContract } from './presentation/contracts/birthday.contract';
+
 const app = express();
 
 app.use(cors());
