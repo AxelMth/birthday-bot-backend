@@ -2,9 +2,9 @@ import { BirthdayUseCase } from '../ports/input/birthday.use-case';
 import { BirthdayMessageRepository } from '../ports/output/message.repository';
 import { CommunicationRepository } from '../ports/output/communication.repository';
 import { PersonRepository } from '../ports/output/person.repository';
-import { Application } from '@/domain/value-objects/application';
+import { Application } from '../../domain/value-objects/application';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
-import { Person } from '@/domain/entities/person';
+import { Person } from '../../domain/entities/person';
 
 export class BirthdayService implements BirthdayUseCase {
   constructor(

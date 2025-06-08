@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { BirthdayMessageRepository } from '@/application/ports/output/message.repository';
+import { BirthdayMessageRepository } from '../../application/ports/output/message.repository';
 
 type SlackMetadata = {
   channelId: string;
@@ -12,7 +12,7 @@ export class SlackBirthdayMessageRepository
 {
   async sendMessage(message: string, metadata: SlackMetadata): Promise<void> {
     const url = 'https://slack.com/api/chat.postMessage';
-    let data = JSON.stringify({
+    const data = JSON.stringify({
       channel: metadata.channelId,
       text: `${message} <@${metadata.personId}>`,
     });

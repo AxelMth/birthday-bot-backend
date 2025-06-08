@@ -4,7 +4,7 @@ import { Application } from '../../domain/value-objects/application';
 interface DatabaseCommunication {
   id: number;
   personId: number;
-  application: string;
+  application: 'slack' | 'email';
 }
 
 export class DatabaseCommunicationAdapter {
@@ -14,5 +14,13 @@ export class DatabaseCommunicationAdapter {
       communication.personId,
       communication.application as Application
     );
+  }
+
+  static toDatabase(communication: Communication): DatabaseCommunication {
+    return {
+      id: communication.id,
+      personId: communication.personId,
+      application: communication.application,
+    };
   }
 }

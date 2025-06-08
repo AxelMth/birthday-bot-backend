@@ -1,5 +1,5 @@
-import { CommunicationMetadataRepository } from '@/application/ports/output/metadata.repository';
-import { SlackMetadata } from '@/domain/value-objects/communication-metadata';
+import { CommunicationMetadataRepository } from '../../application/ports/output/metadata.repository';
+import { SlackMetadata } from '../../domain/value-objects/communication-metadata';
 import { db } from '../../db';
 import { slackMetadata } from '../../db/schema';
 import { eq } from 'drizzle-orm';

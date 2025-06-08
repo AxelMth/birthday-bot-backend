@@ -1,4 +1,4 @@
-import { CommunicationMetadataRepository } from '@/application/ports/output/metadata.repository';
+import { CommunicationMetadataRepository } from '../../application/ports/output/metadata.repository';
 import { Application } from '../../domain/value-objects/application';
 import { CommunicationMetadata } from '../../domain/value-objects/communication-metadata';
 import { SlackMetadataRepository } from '../repositories/database-slack-metadata.repository';

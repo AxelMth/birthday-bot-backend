@@ -1,17 +1,10 @@
 import { relations } from 'drizzle-orm';
-import {
-  date,
-  integer,
-  pgTable,
-  varchar,
-  pgEnum,
-  uniqueIndex,
-} from 'drizzle-orm/pg-core';
+import { date, integer, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
 // Enums
 export const contactMethodAppEnum = pgEnum('contact_method_app', [
   'slack',
-  'teams',
+  'email',
 ]);
 
 export const groupTypeEnum = pgEnum('group_type', [
@@ -28,30 +21,23 @@ export const people = pgTable('people', {
   birthDate: date().notNull(),
 });
 
-export const contactMethods = pgTable(
-  'contact_methods',
-  {
-    id: integer().primaryKey().generatedAlwaysAsIdentity(),
-    personId: integer()
-      .notNull()
-      .references(() => people.id, { onDelete: 'cascade' }),
-    application: contactMethodAppEnum().notNull(),
-  },
-  table => [
-    uniqueIndex('contact_method_unique').on(table.personId, table.application),
-  ]
-);
+export const contactMethods = pgTable('contact_methods', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  personId: integer()
+    .notNull()
+    .references(() => people.id, { onDelete: 'cascade' }),
+  application: contactMethodAppEnum().notNull(),
+});
 
 export const slackMetadata = pgTable('slack_metadata', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   contactMethodId: integer()
     .notNull()
-    .unique()
     .references(() => contactMethods.id, {
       onDelete: 'cascade',
     }),
   channelId: varchar({ length: 255 }).notNull(),
-  slackUserId: varchar({ length: 255 }).notNull().unique(),
+  slackUserId: varchar({ length: 255 }).notNull(),
 });
 
 export const groups = pgTable('groups', {
@@ -60,20 +46,14 @@ export const groups = pgTable('groups', {
   type: groupTypeEnum().notNull().default('other'),
 });
 
-export const peopleGroups = pgTable(
-  'people_groups',
-  {
-    personId: integer()
-      .notNull()
-      .references(() => people.id, { onDelete: 'cascade' }),
-    groupId: integer()
-      .notNull()
-      .references(() => groups.id, { onDelete: 'cascade' }),
-  },
-  table => [
-    uniqueIndex('people_groups_unique').on(table.personId, table.groupId),
-  ]
-);
+export const peopleGroups = pgTable('people_groups', {
+  personId: integer()
+    .notNull()
+    .references(() => people.id, { onDelete: 'cascade' }),
+  groupId: integer()
+    .notNull()
+    .references(() => groups.id, { onDelete: 'cascade' }),
+});
 
 // Relations
 export const peopleRelations = relations(people, ({ many }) => ({

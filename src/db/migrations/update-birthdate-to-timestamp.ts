@@ -10,7 +10,7 @@ async function main() {
   db.select()
     .from(people)
     .execute()
-    .then(async _users => {
+    .then(async (_users) => {
       for (const user of _users) {
         const [date, month, year] = user.birthDate.split('/').map(Number);
         await db

@@ -1,3 +1,0 @@
-- Use max page argument for crawl
-- Use filters for crawl
-- Remove salt and pepper

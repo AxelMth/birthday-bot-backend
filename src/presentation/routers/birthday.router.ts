@@ -1,11 +1,12 @@
-import { initServer } from '@ts-rest/express';
-
+import { initServer } from '@ts-rest/fastify';
 import { birthdayContract } from 'birthday-bot-contracts';
 
-import { DatabaseUserRepository } from './infrastructure/repositories/database-user.repository';
-import { DatabaseCommunicationRepository } from './infrastructure/repositories/database-communication.repository';
-import { SlackBirthdayMessageRepository } from './infrastructure/repositories/slack-birthday-message.repository';
-import { BirthdayService } from './application/services/birthday.service';
+import { DatabaseUserRepository } from '../../infrastructure/repositories/database-person.repository';
+import { DatabaseCommunicationRepository } from '../../infrastructure/repositories/database-communication.repository';
+import { SlackBirthdayMessageRepository } from '../../infrastructure/repositories/slack-birthday-message.repository';
+import { BirthdayService } from '../../application/services/birthday.service';
+
+const s = initServer();
 
 const databasePersonRepository = new DatabaseUserRepository();
 const databaseCommunicationRepository = new DatabaseCommunicationRepository();
@@ -20,8 +21,6 @@ const birthdayService = new BirthdayService(
   databaseCommunicationRepository
 );
 
-const s = initServer();
-
 export const birthdayRouter = s.router(birthdayContract, {
   sendTodayBirthdayMessages: async () => {
     try {
@@ -33,7 +32,9 @@ export const birthdayRouter = s.router(birthdayContract, {
           message:
             birthdayMessageCount === 0
               ? 'No birthday today'
-              : `${birthdayMessageCount} birthday message${birthdayMessageCount > 1 ? 's' : ''} sent successfully`,
+              : `${birthdayMessageCount} birthday message${
+                  birthdayMessageCount > 1 ? 's' : ''
+                } sent successfully`,
         },
       };
     } catch (error) {
