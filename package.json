@@ -1,11 +1,12 @@
 {
-  "name": "@birthday-bot-monorepo/fastify-api",
+  "name": "birthday-bot-backend",
   "version": "0.0.1",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "pnpx tsx watch src/main.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node dist/main.js"
+    "start": "tsx src/main.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.0.0",
@@ -22,6 +23,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.15.30",
+    "tsx": "^4.19.4",
     "typescript": "^5.8.3"
   }
 }

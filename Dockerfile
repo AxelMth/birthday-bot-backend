@@ -7,6 +7,9 @@ FROM node:${NODE_VERSION}-slim AS base
 # Install pnpm
 RUN npm install -g pnpm
 
+# Install tsx
+RUN npm install -g tsx
+
 LABEL fly_launch_runtime="NodeJS"
 
 # NodeJS app lives here
@@ -30,9 +33,6 @@ RUN pnpm install --production=false
 
 # Copy application code
 COPY --link . .
-
-# Build application
-RUN pnpm run build
 
 # Remove development dependencies
 RUN pnpm prune --production

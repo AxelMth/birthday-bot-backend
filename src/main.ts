@@ -14,7 +14,7 @@ const server = Fastify({
 });
 
 // cors
-server.register(require('@fastify/cors'), {
+server.register(import('@fastify/cors'), {
   origin: '*',
 });
 
