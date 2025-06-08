@@ -2,7 +2,7 @@
 
 # Adjust NODE_VERSION as desired
 ARG NODE_VERSION=22.14.0
-FROM node:${NODE_VERSION}-slim as base
+FROM node:${NODE_VERSION}-slim AS base
 
 LABEL fly_launch_runtime="NodeJS"
 
@@ -14,24 +14,27 @@ ENV NODE_ENV=production
 
 
 # Throw-away build stage to reduce size of final image
-FROM base as build
+FROM base AS build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
     apt-get install -y python-is-python3 pkg-config build-essential 
 
+# Install pnpm
+RUN npm install -g pnpm
+
 # Install node modules
 COPY --link package.json .
-RUN npm install --production=false
+RUN pnpm install --production=false
 
 # Copy application code
 COPY --link . .
 
 # Build application
-RUN npm run build
+RUN pnpm run build
 
 # Remove development dependencies
-RUN npm prune --production
+RUN pnpm prune --production
 
 
 # Final stage for app image
@@ -41,4 +44,4 @@ FROM base
 COPY --from=build /app /app
 
 # Start the server by default, this can be overwritten at runtime
-CMD [ "npm", "run", "start" ]
+CMD [ "pnpm", "run", "start" ]
