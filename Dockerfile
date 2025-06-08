@@ -4,6 +4,9 @@
 ARG NODE_VERSION=22.14.0
 FROM node:${NODE_VERSION}-slim AS base
 
+# Install pnpm
+RUN npm install -g pnpm
+
 LABEL fly_launch_runtime="NodeJS"
 
 # NodeJS app lives here
@@ -20,8 +23,6 @@ FROM base AS build
 RUN apt-get update -qq && \
     apt-get install -y python-is-python3 pkg-config build-essential 
 
-# Install pnpm
-RUN npm install -g pnpm
 
 # Install node modules
 COPY --link package.json .
