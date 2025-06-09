@@ -16,6 +16,7 @@ const server = Fastify({
 // cors
 server.register(import('@fastify/cors'), {
   origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 });
 
 // env
