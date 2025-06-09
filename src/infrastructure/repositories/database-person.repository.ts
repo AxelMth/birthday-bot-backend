@@ -17,7 +17,11 @@ export class DatabaseUserRepository implements PersonRepository {
   }
 
   async getPaginatedPeople(
-    { limit, offset }: { limit: number; offset: number } = {
+    {
+      limit,    
+      offset,
+      search,
+    }: { limit: number; offset: number; search?: string } = {
       limit: 10,
       offset: 0,
     }
@@ -25,6 +29,9 @@ export class DatabaseUserRepository implements PersonRepository {
     const _users = await db
       .select()
       .from(people)
+      .where( 
+        sql`name ILIKE ${`%${search}%`}`
+      )
       .limit(limit)
       .offset(offset)
       .orderBy(people.name)
@@ -32,10 +39,17 @@ export class DatabaseUserRepository implements PersonRepository {
     return _users.map(DatabasePersonAdapter.toDomain);
   }
 
-  async getPeopleCount(): Promise<number> {
+  async getPeopleCount({
+    search,
+  }: { search?: string } = {
+    search: '',
+  }): Promise<number> {
     const [{ count: counter }] = await await db
       .select({ count: count() })
-      .from(people);
+      .from(people)
+      .where( 
+        sql`name ILIKE ${`%${search}%`}`
+      );
     return counter;
   }
 
