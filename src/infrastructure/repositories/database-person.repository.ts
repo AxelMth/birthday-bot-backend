@@ -30,7 +30,7 @@ export class DatabaseUserRepository implements PersonRepository {
       .select()
       .from(people)
       .where( 
-        sql`name ILIKE ${`%${search}%`}`
+        search ? sql`name ILIKE ${`%${search}%`}` : undefined
       )
       .limit(limit)
       .offset(offset)

@@ -46,14 +46,14 @@ export class PeopleService implements PeopleUseCase {
     query: z.infer<typeof getPeopleQuerySchema>
   ): Promise<PaginatedPeopleWithCommunications> {
     const peopleCount = await this.personRepository.getPeopleCount({
-      search: query.search,
+      ...(query.search ? { search: query.search } : {}),
     });
     const limit = query.pageSize ?? 10;
     const offset = (query.pageSize ?? 10) * ((query.pageNumber ?? 1) - 1);
     const people = await this.personRepository.getPaginatedPeople({
-      search: query.search,
       limit,  
       offset,
+      ...(query.search ? { search: query.search } : {}),
     });
     const peopleWithCommunications = await Promise.all(
       people.map(async (person) => {
