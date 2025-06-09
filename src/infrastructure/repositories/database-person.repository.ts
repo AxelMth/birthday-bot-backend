@@ -48,7 +48,7 @@ export class DatabaseUserRepository implements PersonRepository {
       .select({ count: count() })
       .from(people)
       .where( 
-        sql`name ILIKE ${`%${search}%`}`
+        search ? sql`name ILIKE ${`%${search}%`}` : undefined
       );
     return counter;
   }
