@@ -12,7 +12,7 @@ const databaseCommunicationRepository = new DatabaseCommunicationRepository();
 
 const peopleService = new PeopleService(
   databasePersonRepository,
-  databaseCommunicationRepository
+  databaseCommunicationRepository,
 );
 
 export const peopleRouter = s.router(peopleContract, {

@@ -10,7 +10,11 @@ export type PaginatedPeopleWithCommunications = {
 };
 
 export type PersonWithCommunications = Person & {
-  communications: Communication[];
+  communications: CommunicationWithMetadata[];
+};
+
+export type CommunicationWithMetadata = Communication & {
+  metadata: unknown;
 };
 
 export interface PeopleUseCase {

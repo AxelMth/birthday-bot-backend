@@ -12,11 +12,12 @@ import {
   PeopleUseCase,
 } from '../ports/input/people.use-case';
 import { Person } from '../../domain/entities/person';
+import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
 
 export class PeopleService implements PeopleUseCase {
   constructor(
     private readonly personRepository: PersonRepository,
-    private readonly communicationRepository: CommunicationRepository
+    private readonly communicationRepository: CommunicationRepository,
   ) {}
 
   async createPerson(personPayload: z.infer<typeof createPersonBodySchema>) {
@@ -56,11 +57,8 @@ export class PeopleService implements PeopleUseCase {
       ...(query.search ? { search: query.search } : {}),
     });
     const peopleWithCommunications = await Promise.all(
-      people.map(async (person) => {
-        const communications = await this.communicationRepository.getByPersonId(
-          person.id
-        );
-        return { ...person, communications };
+      people.map((person) => {
+        return this.getPersonById(person.id);
       })
     );
     return {
@@ -74,6 +72,18 @@ export class PeopleService implements PeopleUseCase {
     const communications = await this.communicationRepository.getByPersonId(
       person.id
     );
-    return { ...person, communications };
+    const communicationsWithMetadata = [];
+    for (const communication of communications) {
+      const metadataRepository = MetadataRepositoryFactory.getRepository(
+        communication.application
+      );
+      const metadata = await metadataRepository.getMetadataForCommunication(
+        communication.id
+      ).catch(() => {
+        return null;
+      });
+      communicationsWithMetadata.push({ ...communication, metadata });
+    }
+    return { ...person, communications: communicationsWithMetadata };
   }
 }
