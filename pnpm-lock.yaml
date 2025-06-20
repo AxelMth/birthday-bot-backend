@@ -24,8 +24,8 @@ importers:
         specifier: ^1.9.0
         version: 1.9.0
       birthday-bot-contracts:
-        specifier: ^0.1.11
-        version: 0.1.11(@types/node@22.15.30)
+        specifier: ^0.1.12
+        version: 0.1.12(@types/node@22.15.30)
       dotenv:
         specifier: ^16.4.7
         version: 16.5.0
@@ -279,8 +279,8 @@ packages:
   axios@1.9.0:
     resolution: {integrity: sha512-re4CqKTJaURpzbLHtIi6XpDv20/CnpXOtjRY5/CU32L8gU8ek9UIivcfvSWvmKEngmVbrUtPpdDwWDWL7DNHvg==}
 
-  birthday-bot-contracts@0.1.11:
-    resolution: {integrity: sha512-/o/WR9PA5RTYS1oeU7eoiv37g/eWEVjgKqhY5OwVryCZMEhcUzN8ziW5mEPstu5235i6463dd9Sfi7OxBdbGOA==}
+  birthday-bot-contracts@0.1.12:
+    resolution: {integrity: sha512-FrseE145gv3+bHSn7xyxQThEutasRB+FM+oN3pN/SajZzmm9cI2tLmwtLOaYpBJ5TEnnyovHxZWY9lU2d0uuvg==}
 
   call-bind-apply-helpers@1.0.2:
     resolution: {integrity: sha512-Sp1ablJ0ivDkSzjcaJdxEunN5/XvksFJ2sMBFfq6x0ryhQV/2b/KwFe21cMpmHtPOSij8K99/wSfoEuTObmuMQ==}
@@ -838,7 +838,7 @@ snapshots:
     transitivePeerDependencies:
       - debug
 
-  birthday-bot-contracts@0.1.11(@types/node@22.15.30):
+  birthday-bot-contracts@0.1.12(@types/node@22.15.30):
     dependencies:
       '@ts-rest/core': 3.52.1(@types/node@22.15.30)(zod@3.25.56)
       zod: 3.25.56

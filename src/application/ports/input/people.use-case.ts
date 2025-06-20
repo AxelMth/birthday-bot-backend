@@ -14,7 +14,7 @@ export type PersonWithCommunications = Person & {
 };
 
 export type CommunicationWithMetadata = Communication & {
-  metadata: unknown;
+  metadata: Record<string, unknown>;
 };
 
 export interface PeopleUseCase {
