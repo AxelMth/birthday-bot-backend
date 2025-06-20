@@ -13,6 +13,8 @@ import {
 } from '../ports/input/people.use-case';
 import { Person } from '../../domain/entities/person';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
+import { Application } from '../../domain/value-objects/application';
+import { Communication } from '../../domain/entities/communication';
 
 export class PeopleService implements PeopleUseCase {
   constructor(

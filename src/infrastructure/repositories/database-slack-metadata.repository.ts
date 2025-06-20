@@ -24,7 +24,27 @@ export class SlackMetadataRepository
 
     return {
       channelId: metadata[0].channelId,
-      personId: metadata[0].slackUserId,
+      userId: metadata[0].slackUserId,
     };
+  }
+
+  async upsertMetadataForCommunication(
+    communicationId: number,
+    metadata: SlackMetadata
+  ): Promise<void> {
+    await db
+      .insert(slackMetadata)
+      .values({
+        contactMethodId: communicationId,
+        channelId: metadata.channelId,
+        slackUserId: metadata.userId,
+      })
+      .onConflictDoUpdate({
+        target: [slackMetadata.contactMethodId],
+        set: {
+          channelId: metadata.channelId,
+          slackUserId: metadata.userId,
+        },
+      });
   }
 }

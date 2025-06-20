@@ -20,10 +20,13 @@ export class DatabaseCommunicationRepository
   async createCommunication(
     communication: Communication
   ): Promise<Communication> {
-    const [id] = await db
+    const result = await db
       .insert(contactMethods)
-      .values(DatabaseCommunicationAdapter.toDatabase(communication));
-    return { ...communication, id };
+      .values({
+        personId: communication.personId,
+        application: communication.application,
+      });
+    return new Communication(result.id, communication.personId, communication.application, {});
   }
 
   async updateCommunicationById(
@@ -34,5 +37,18 @@ export class DatabaseCommunicationRepository
       .update(contactMethods)
       .set(DatabaseCommunicationAdapter.toDatabase(communication))
       .where(eq(contactMethods.id, id));
+  }
+
+  async updateCommunicationsByPersonId(
+    personId: number,
+    communication: Communication
+  ): Promise<void> {
+    await db
+      .update(contactMethods)
+      .set({
+        personId: communication.personId,
+        application: communication.application,
+      })
+      .where(eq(contactMethods.personId, personId));
   }
 }

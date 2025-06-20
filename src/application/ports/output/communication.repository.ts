@@ -7,4 +7,8 @@ export interface CommunicationRepository {
     id: number,
     communication: Communication
   ): Promise<void>;
+  updateCommunicationsByPersonId(
+    personId: number,
+    communication: Communication
+  ): Promise<void>;
 }

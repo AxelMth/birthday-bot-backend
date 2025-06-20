@@ -1,6 +1,6 @@
 export interface SlackMetadata {
   channelId: string;
-  personId: string;
+  userId: string;
 }
 
 export type CommunicationMetadata = {

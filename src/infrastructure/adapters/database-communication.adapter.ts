@@ -12,7 +12,8 @@ export class DatabaseCommunicationAdapter {
     return new Communication(
       communication.id,
       communication.personId,
-      communication.application as Application
+      communication.application as Application,
+      {}
     );
   }
 

@@ -4,6 +4,8 @@ import { peopleContract } from 'birthday-bot-contracts';
 import { DatabaseUserRepository } from '../../infrastructure/repositories/database-person.repository';
 import { DatabaseCommunicationRepository } from '../../infrastructure/repositories/database-communication.repository';
 import { PeopleService } from '../../application/services/people.service';
+import { CommunicationService } from '../../application/services/communication.service';
+import { Application } from '../../domain/value-objects/application';
 
 const s = initServer();
 
@@ -12,6 +14,10 @@ const databaseCommunicationRepository = new DatabaseCommunicationRepository();
 
 const peopleService = new PeopleService(
   databasePersonRepository,
+  databaseCommunicationRepository,
+);
+
+const communicationService = new CommunicationService(
   databaseCommunicationRepository,
 );
 
@@ -43,11 +49,18 @@ export const peopleRouter = s.router(peopleContract, {
   updatePersonById: async ({ params, body }) => {
     try {
       const person = await peopleService.updatePersonById(params.id!, body);
+      await communicationService.upsertCommunicationByPersonId(params.id!, {
+        id: 0,
+        personId: params.id!,
+        application: body.application as Application,
+        metadata: body.metadata,
+      });
       return {
         status: 200,
         body: person,
       };
     } catch (error) {
+      console.error(error);
       if (error instanceof Error) {
         return {
           status: 500,
