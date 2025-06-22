@@ -3,7 +3,7 @@ export interface SlackMetadata {
   userId: string;
 }
 
-export type CommunicationMetadata = {
+export type ContactMethodMetadata = {
   slack: SlackMetadata;
   // Add other app metadata types here
 };

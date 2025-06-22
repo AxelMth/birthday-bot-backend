@@ -1,6 +1,6 @@
 import { BirthdayUseCase } from '../ports/input/birthday.use-case';
 import { BirthdayMessageRepository } from '../ports/output/message.repository';
-import { CommunicationRepository } from '../ports/output/communication.repository';
+import { ContactMethodRepository } from '../ports/output/contact-method.repository';
 import { PersonRepository } from '../ports/output/person.repository';
 import { Application } from '../../domain/value-objects/application';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
@@ -13,7 +13,7 @@ export class BirthdayService implements BirthdayUseCase {
       BirthdayMessageRepository
     >,
     private readonly personRepository: PersonRepository,
-    private readonly communicationRepository: CommunicationRepository
+    private readonly contactMethodRepository: ContactMethodRepository
   ) {}
 
   async getNextBirthdaysUntil(date: Date): Promise<Person[]> {
@@ -32,22 +32,24 @@ export class BirthdayService implements BirthdayUseCase {
     }
     let birthdayMessageCount = 0;
     for (const person of people) {
-      const communications = await this.communicationRepository.getByPersonId(
+      const contactMethod = await this.contactMethodRepository.getByPersonId(
         person.id
       );
-      for (const communication of communications) {
-        const messageRepository =
-          this.messageRepositoriesByApplication[communication.application];
-        const metadataRepository = MetadataRepositoryFactory.getRepository(
-          communication.application
-        );
-
-        const metadata = await metadataRepository.getMetadataForCommunication(
-          communication.id
-        );
-        await messageRepository.sendMessage('Joyeux anniversaire ', metadata);
-        birthdayMessageCount++;
+      if (!contactMethod) {
+        console.error(`No contact method found for person ${person.id}`);
+        continue;
       }
+      const messageRepository =
+        this.messageRepositoriesByApplication[contactMethod.application];
+      const metadataRepository = MetadataRepositoryFactory.getRepository(
+        contactMethod.application
+      );
+
+      const metadata = await metadataRepository.getMetadataForContactMethod(
+        contactMethod.id
+      );
+      await messageRepository.sendMessage('Joyeux anniversaire ', metadata);
+      birthdayMessageCount++;
     }
     return {
       birthdayMessageCount,

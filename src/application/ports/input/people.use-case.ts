@@ -2,28 +2,28 @@ import * as z from 'zod';
 import { getPeopleQuerySchema } from 'birthday-bot-contracts';
 
 import { Person } from '../../../domain/entities/person';
-import { Communication } from '../../../domain/entities/communication';
+import { ContactMethod } from '../../../domain/entities/contact-method';
 
-export type PaginatedPeopleWithCommunications = {
-  people: PersonWithCommunications[];
+export type PaginatedPeopleWithContactMethod = {
+  people: PersonWithContactMethod[];
   count: number;
 };
 
-export type PersonWithCommunications = Person & {
-  communications: CommunicationWithMetadata[];
+export type PersonWithContactMethod = Person & {
+  contactMethod: ContactMethodWithMetadata;
 };
 
-export type CommunicationWithMetadata = Communication & {
+export type ContactMethodWithMetadata = ContactMethod & {
   metadata: Record<string, unknown>;
 };
 
 export interface PeopleUseCase {
   getPaginatedPeople(
     query: z.infer<typeof getPeopleQuerySchema>
-  ): Promise<PaginatedPeopleWithCommunications>;
-  getPersonById(id: number): Promise<PersonWithCommunications>;
+  ): Promise<PaginatedPeopleWithContactMethod>;
+  getPersonById(id: number): Promise<PersonWithContactMethod>;
   updatePersonById(
     id: number,
     person: Person
-  ): Promise<PersonWithCommunications>;
+  ): Promise<PersonWithContactMethod>;
 }

@@ -5,21 +5,19 @@ import {
   updatePersonByIdBodySchema,
 } from 'birthday-bot-contracts';
 
-import { CommunicationRepository } from '../ports/output/communication.repository';
+import { ContactMethodRepository } from '../ports/output/contact-method.repository';
 import { PersonRepository } from '../ports/output/person.repository';
 import {
-  PaginatedPeopleWithCommunications,
+  PaginatedPeopleWithContactMethod,
   PeopleUseCase,
 } from '../ports/input/people.use-case';
 import { Person } from '../../domain/entities/person';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
-import { Application } from '../../domain/value-objects/application';
-import { Communication } from '../../domain/entities/communication';
 
 export class PeopleService implements PeopleUseCase {
   constructor(
     private readonly personRepository: PersonRepository,
-    private readonly communicationRepository: CommunicationRepository,
+    private readonly contactMethodRepository: ContactMethodRepository,
   ) {}
 
   async createPerson(personPayload: z.infer<typeof createPersonBodySchema>) {
@@ -47,7 +45,7 @@ export class PeopleService implements PeopleUseCase {
 
   async getPaginatedPeople(
     query: z.infer<typeof getPeopleQuerySchema>
-  ): Promise<PaginatedPeopleWithCommunications> {
+  ): Promise<PaginatedPeopleWithContactMethod> {
     const peopleCount = await this.personRepository.getPeopleCount({
       ...(query.search ? { search: query.search } : {}),
     });
@@ -58,34 +56,30 @@ export class PeopleService implements PeopleUseCase {
       offset,
       ...(query.search ? { search: query.search } : {}),
     });
-    const peopleWithCommunications = await Promise.all(
+    const peopleWithContactMethods = await Promise.all(
       people.map((person) => {
         return this.getPersonById(person.id);
       })
     );
     return {
-      people: peopleWithCommunications,
+      people: peopleWithContactMethods,
       count: peopleCount,
     };
   }
 
   async getPersonById(id: number) {
     const person = await this.personRepository.getPeopleById(id);
-    const communications = await this.communicationRepository.getByPersonId(
+    const contactMethod = await this.contactMethodRepository.getByPersonId(
       person.id
     );
-    const communicationsWithMetadata = [];
-    for (const communication of communications) {
-      const metadataRepository = MetadataRepositoryFactory.getRepository(
-        communication.application
-      );
-      const metadata = await metadataRepository.getMetadataForCommunication(
-        communication.id
-      ).catch(() => {
-        return null;
-      });
-      communicationsWithMetadata.push({ ...communication, metadata });
-    }
-    return { ...person, communications: communicationsWithMetadata };
+    const metadataRepository = MetadataRepositoryFactory.getRepository(
+      contactMethod.application
+    );
+    const metadata = await metadataRepository.getMetadataForContactMethod(
+      contactMethod.id
+    ).catch(() => {
+      return null;
+    });
+    return { ...person, contactMethod: { ...contactMethod, metadata } };
   }
 }

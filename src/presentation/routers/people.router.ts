@@ -2,23 +2,23 @@ import { initServer } from '@ts-rest/fastify';
 import { peopleContract } from 'birthday-bot-contracts';
 
 import { DatabaseUserRepository } from '../../infrastructure/repositories/database-person.repository';
-import { DatabaseCommunicationRepository } from '../../infrastructure/repositories/database-communication.repository';
+import { DatabaseContactMethodRepository } from '../../infrastructure/repositories/database-contact-method.repository';
 import { PeopleService } from '../../application/services/people.service';
-import { CommunicationService } from '../../application/services/communication.service';
+import { ContactMethodService } from '../../application/services/contact-method.service';
 import { Application } from '../../domain/value-objects/application';
 
 const s = initServer();
 
 const databasePersonRepository = new DatabaseUserRepository();
-const databaseCommunicationRepository = new DatabaseCommunicationRepository();
+const databaseContactMethodRepository = new DatabaseContactMethodRepository();
 
 const peopleService = new PeopleService(
   databasePersonRepository,
-  databaseCommunicationRepository,
+  databaseContactMethodRepository,
 );
 
-const communicationService = new CommunicationService(
-  databaseCommunicationRepository,
+const contactMethodService = new ContactMethodService(
+  databaseContactMethodRepository,
 );
 
 export const peopleRouter = s.router(peopleContract, {
@@ -49,7 +49,7 @@ export const peopleRouter = s.router(peopleContract, {
   updatePersonById: async ({ params, body }) => {
     try {
       const person = await peopleService.updatePersonById(params.id!, body);
-      await communicationService.upsertCommunicationByPersonId(params.id!, {
+      await contactMethodService.upsertContactMethodByPersonId(params.id!, {
         id: 0,
         personId: params.id!,
         application: body.application as Application,

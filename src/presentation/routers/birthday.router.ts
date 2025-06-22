@@ -2,14 +2,14 @@ import { initServer } from '@ts-rest/fastify';
 import { birthdayContract } from 'birthday-bot-contracts';
 
 import { DatabaseUserRepository } from '../../infrastructure/repositories/database-person.repository';
-import { DatabaseCommunicationRepository } from '../../infrastructure/repositories/database-communication.repository';
+import { DatabaseContactMethodRepository } from '../../infrastructure/repositories/database-contact-method.repository';
 import { SlackBirthdayMessageRepository } from '../../infrastructure/repositories/slack-birthday-message.repository';
 import { BirthdayService } from '../../application/services/birthday.service';
 
 const s = initServer();
 
 const databasePersonRepository = new DatabaseUserRepository();
-const databaseCommunicationRepository = new DatabaseCommunicationRepository();
+const databaseContactMethodRepository = new DatabaseContactMethodRepository();
 
 const messageRepositoriesByApplication = {
   slack: new SlackBirthdayMessageRepository(),
@@ -18,7 +18,7 @@ const messageRepositoriesByApplication = {
 const birthdayService = new BirthdayService(
   messageRepositoriesByApplication,
   databasePersonRepository,
-  databaseCommunicationRepository
+  databaseContactMethodRepository
 );
 
 export const birthdayRouter = s.router(birthdayContract, {

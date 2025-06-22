@@ -57,7 +57,7 @@ export const peopleGroups = pgTable('people_groups', {
 
 // Relations
 export const peopleRelations = relations(people, ({ many }) => ({
-  communications: many(contactMethods),
+  contactMethods: many(contactMethods),
   groups: many(peopleGroups),
 }));
 
@@ -65,6 +65,6 @@ export const groupRelations = relations(groups, ({ many }) => ({
   people: many(peopleGroups),
 }));
 
-export const communicationRelations = relations(contactMethods, ({ one }) => ({
+export const contactMethodRelations = relations(contactMethods, ({ one }) => ({
   slackMetadata: one(slackMetadata),
 }));
