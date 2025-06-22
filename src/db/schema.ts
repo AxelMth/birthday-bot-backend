@@ -25,7 +25,7 @@ export const contactMethods = pgTable('contact_methods', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   personId: integer()
     .notNull()
-    .references(() => people.id, { onDelete: 'cascade' }),
+    .references(() => people.id, { onDelete: 'cascade' }).unique(),
   application: contactMethodAppEnum().notNull(),
 });
 
