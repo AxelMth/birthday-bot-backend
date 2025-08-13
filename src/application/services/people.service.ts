@@ -8,7 +8,7 @@ import {
 import { ContactMethodRepository } from '../ports/output/contact-method.repository';
 import { PersonRepository } from '../ports/output/person.repository';
 import {
-  PaginatedPeopleWithContactMethod,
+  PaginatedPeopleWithContact,
   PeopleUseCase,
 } from '../ports/input/people.use-case';
 import { Person } from '../../domain/entities/person';
@@ -45,7 +45,7 @@ export class PeopleService implements PeopleUseCase {
 
   async getPaginatedPeople(
     query: z.infer<typeof getPeopleQuerySchema>
-  ): Promise<PaginatedPeopleWithContactMethod> {
+  ): Promise<PaginatedPeopleWithContact> {
     const peopleCount = await this.personRepository.getPeopleCount({
       ...(query.search ? { search: query.search } : {}),
     });
@@ -80,6 +80,6 @@ export class PeopleService implements PeopleUseCase {
     ).catch(() => {
       return null;
     });
-    return { ...person, contactMethod: { ...contactMethod, metadata } };
+    return { ...person, application: contactMethod.application, metadata };
   }
 }
