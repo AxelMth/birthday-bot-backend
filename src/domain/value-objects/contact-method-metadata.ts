@@ -1,5 +1,5 @@
 export interface SlackMetadata {
-  channelId: string;
+  webhookUrl: string;
   userId: string;
 }
 

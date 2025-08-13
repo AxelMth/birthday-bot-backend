@@ -8,6 +8,11 @@ import { contactMethods, people, slackMetadata } from '../schema';
 const db = drizzle(process.env.DATABASE_URL!);
 
 async function main() {
+  const webhookUrl = process.env.SLACK_WEBHOOK_URL!;
+  if (!webhookUrl) {
+    throw new Error('SLACK_WEBHOOK_URL is required for seeding slack metadata');
+  }
+
   const content = (await fs.readFile('slack_ids.csv', 'utf-8')).split('\n');
   const peopleNamesWithSlackIds = content.map(line => line.split(';'));
   for (const [name, slackId] of peopleNamesWithSlackIds) {
@@ -36,7 +41,7 @@ async function main() {
     console.log(`Creating slack metadata for ${name}`);
     await db.insert(slackMetadata).values({
       contactMethodId: contactMethod[0].id,
-      channelId: 'C0D9VG7M4', // random
+      webhookUrl,
       slackUserId: slackId,
     });
   }

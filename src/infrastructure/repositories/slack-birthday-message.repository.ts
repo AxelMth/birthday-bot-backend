@@ -1,27 +1,22 @@
-import axios from 'axios';
+import { exec as execCb } from 'node:child_process';
+import { promisify } from 'node:util';
 
 import { BirthdayMessageRepository } from '../../application/ports/output/message.repository';
 
+const exec = promisify(execCb);
+
 type SlackMetadata = {
-  channelId: string;
-  personId: string;
+  webhookUrl: string;
+  userId: string;
 };
 
 export class SlackBirthdayMessageRepository
   implements BirthdayMessageRepository<SlackMetadata>
 {
   async sendMessage(message: string, metadata: SlackMetadata): Promise<void> {
-    const url = 'https://slack.com/api/chat.postMessage';
-    const data = JSON.stringify({
-      channel: metadata.channelId,
-      text: `${message} <@${metadata.personId}>`,
-    });
-
-    return axios.post(url, data, {
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${process.env.SLACK_BOT_TOKEN}`,
-      },
-    });
+    const text = `${message} <@${metadata.userId}>`;
+    const payload = JSON.stringify({ text }).replace(/'/g, "'\\''");
+    const cmd = `curl --fail -sS -X POST -H "Content-type: application/json" --data '${payload}' ${metadata.webhookUrl}`;
+    await exec(cmd);
   }
 }

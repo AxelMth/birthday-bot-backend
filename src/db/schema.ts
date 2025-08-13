@@ -36,7 +36,7 @@ export const slackMetadata = pgTable('slack_metadata', {
     .references(() => contactMethods.id, {
       onDelete: 'cascade',
     }).unique(),
-  channelId: varchar({ length: 255 }).notNull(),
+  webhookUrl: varchar({ length: 255 }).notNull(),
   slackUserId: varchar({ length: 255 }).notNull(),
 });
 

@@ -10,6 +10,11 @@ RUN npm install -g pnpm
 # Install tsx
 RUN npm install -g tsx
 
+# Install curl for runtime
+RUN apt-get update -qq && \
+    apt-get install -y curl && \
+    rm -rf /var/lib/apt/lists/*
+
 LABEL fly_launch_runtime="NodeJS"
 
 # NodeJS app lives here
@@ -24,7 +29,7 @@ FROM base AS build
 
 # Install packages needed to build node modules
 RUN apt-get update -qq && \
-    apt-get install -y python-is-python3 pkg-config build-essential 
+    apt-get install -y python-is-python3 pkg-config build-essential
 
 
 # Install node modules
