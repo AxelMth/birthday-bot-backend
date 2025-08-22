@@ -18,7 +18,7 @@ export const groupTypeEnum = pgEnum('group_type', [
 export const people = pgTable('people', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
-  birthDate: date().notNull(),
+  birthDate: date(),
 });
 
 export const contactMethods = pgTable('contact_methods', {
