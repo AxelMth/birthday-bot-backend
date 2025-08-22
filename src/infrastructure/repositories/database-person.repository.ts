@@ -44,7 +44,7 @@ export class DatabaseUserRepository implements PersonRepository {
   }: { search?: string } = {
     search: '',
   }): Promise<number> {
-    const [{ count: counter }] = await await db
+    const [{ count: counter }] = await db
       .select({ count: count() })
       .from(people)
       .where( 
@@ -89,7 +89,7 @@ export class DatabaseUserRepository implements PersonRepository {
       .update(people)
       .set({
         name: person.name,
-        birthDate: person.birthdate.toISOString(),
+        ...(person.birthdate ? { birthDate: person.birthdate.toISOString().split('T')[0] } : {}),
       })
       .where(eq(people.id, id))
       .execute();
@@ -100,7 +100,7 @@ export class DatabaseUserRepository implements PersonRepository {
       .insert(people)
       .values({
         name: person.name,
-        birthDate: person.birthdate.toISOString(),
+        ...(person.birthdate ? { birthDate: person.birthdate.toISOString().split('T')[0] } : {}),
       })
       .returning({
         id: people.id,

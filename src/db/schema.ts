@@ -1,4 +1,4 @@
-import { relations } from 'drizzle-orm';
+import { relations, sql } from 'drizzle-orm';
 import { date, integer, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
 // Enums
@@ -18,7 +18,7 @@ export const groupTypeEnum = pgEnum('group_type', [
 export const people = pgTable('people', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   name: varchar({ length: 255 }).notNull(),
-  birthDate: date(),
+  birthDate: date()
 });
 
 export const contactMethods = pgTable('contact_methods', {

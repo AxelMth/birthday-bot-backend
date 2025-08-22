@@ -16,7 +16,7 @@ async function main() {
     }
     await db.insert(people).values({
       name,
-      birthDate,
+      ...(birthDate ? { birthDate: new Date(birthDate) } : {}),
     });
   }
 }

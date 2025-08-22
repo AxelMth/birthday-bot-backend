@@ -88,8 +88,7 @@ async function main() {
       const insertedPerson = await db
         .insert(people)
         .values({ 
-          name, 
-          birthDate: '1900-01-01' // Placeholder birth date for Slack users
+          name,
         })
         .returning()
         .execute();
