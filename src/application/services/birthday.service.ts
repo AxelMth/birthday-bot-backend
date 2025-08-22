@@ -7,6 +7,24 @@ import { MetadataRepositoryFactory } from '../../infrastructure/factories/metada
 import { Person } from '../../domain/entities/person';
 
 export class BirthdayService implements BirthdayUseCase {
+  private readonly birthdayMessages = [
+    'Joyeux anniversaire ! 🎉',
+    'Bon anniversaire ! 🎂',
+    'Félicitations pour ton anniversaire ! 🥳',
+    'Que cette nouvelle année t\'apporte bonheur et réussite ! 🌟',
+    'Un très joyeux anniversaire ! 🎈',
+    'Bonne fête ! Profite bien de ta journée spéciale ! 🎊',
+    'Anniversaire magique ! ✨🎂',
+    'Souhaits de bonheur pour ton anniversaire ! 💫',
+    'Une merveilleuse journée d\'anniversaire ! 🌈',
+    'Que cette nouvelle année t\'apporte bonheur et réussite ! 🌟',
+    'Un très joyeux anniversaire ! 🎈',
+    'Bonne fête ! Profite bien de ta journée spéciale ! 🎊',
+    'Anniversaire magique ! ✨🎂',
+    'Souhaits de bonheur pour ton anniversaire ! 💫',
+    'Une merveilleuse journée d\'anniversaire ! 🌈',
+  ];
+
   constructor(
     private readonly messageRepositoriesByApplication: Record<
       Application,
@@ -15,6 +33,11 @@ export class BirthdayService implements BirthdayUseCase {
     private readonly personRepository: PersonRepository,
     private readonly contactMethodRepository: ContactMethodRepository
   ) {}
+
+  private getRandomBirthdayMessage(): string {
+    const randomIndex = Math.floor(Math.random() * this.birthdayMessages.length);
+    return this.birthdayMessages[randomIndex];
+  }
 
   async getNextBirthdaysUntil(date: Date): Promise<Person[]> {
     return this.personRepository.getPeopleByBirthdayRange(new Date(), date);
@@ -48,7 +71,8 @@ export class BirthdayService implements BirthdayUseCase {
       const metadata = await metadataRepository.getMetadataForContactMethod(
         contactMethod.id
       );
-      await messageRepository.sendMessage('Joyeux anniversaire ', metadata);
+      const randomMessage = this.getRandomBirthdayMessage();
+      await messageRepository.sendMessage(randomMessage, metadata);
       birthdayMessageCount++;
     }
     return {
