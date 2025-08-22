@@ -4,8 +4,7 @@ import { eq, ilike } from 'drizzle-orm';
 import fs from 'node:fs/promises';
 import { contactMethods, people, slackMetadata } from '../schema';
 
-const WEBHOOK_URL =
-  'https://hooks.slack.com/services/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';
+const WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL!;
 
 const db = drizzle(process.env.DATABASE_URL!);
 
