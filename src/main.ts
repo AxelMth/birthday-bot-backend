@@ -27,7 +27,7 @@ server.register(fastifyEnv, {
     properties: {
       PORT: {
         type: 'number',
-        default: 3000,
+        default: 3001,
       },
       DATABASE_URL: {
         type: 'string',
