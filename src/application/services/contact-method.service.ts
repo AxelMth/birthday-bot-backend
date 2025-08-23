@@ -1,16 +1,17 @@
 import { ContactMethodRepository } from '../ports/output/contact-method.repository';
-import { ContactMethodUseCase } from '../ports/input/contact-method.use-case'
-
+import { ContactMethodUseCase } from '../ports/input/contact-method.use-case';
 
 import { ContactMethod } from '../../domain/entities/contact-method';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
-
-
 
 export class ContactMethodService implements ContactMethodUseCase {
   constructor(
     private readonly contactMethodRepository: ContactMethodRepository,
   ) {}
+
+  async getAllContactMethods(): Promise<ContactMethod[]> {
+    return await this.contactMethodRepository.getAllContactMethods();
+  }
 
   async upsertContactMethodByPersonId(
     personId: number,

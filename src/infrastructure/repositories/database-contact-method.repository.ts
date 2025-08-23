@@ -1,10 +1,11 @@
 import { eq } from 'drizzle-orm';
 
 import { db } from '../../db';
-import { contactMethods } from '../../db/schema';
+import { contactMethods, slackMetadata } from '../../db/schema';
 import { DatabaseContactMethodAdapter } from '../adapters/database-contact-method.adapter';
 import { ContactMethodRepository } from '../../application/ports/output/contact-method.repository';
 import { ContactMethod } from '../../domain/entities/contact-method';
+import { MetadataRepositoryFactory } from '../factories/metadata-repository.factory';
 
 export class DatabaseContactMethodRepository
   implements ContactMethodRepository
@@ -15,6 +16,35 @@ export class DatabaseContactMethodRepository
       .from(contactMethods)
       .where(eq(contactMethods.personId, personId));
     return DatabaseContactMethodAdapter.toDomain(_contactMethods[0]);
+  }
+
+  async getAllContactMethods(): Promise<ContactMethod[]> {
+    const _contactMethods = await db
+      .select()
+      .from(contactMethods)
+      .leftJoin(slackMetadata, eq(contactMethods.id, slackMetadata.contactMethodId));
+
+    const contactMethodsWithMetadata = await Promise.all(
+      _contactMethods.map(async (row) => {
+        const contactMethod = DatabaseContactMethodAdapter.toDomain(row.contact_methods);
+        
+        try {
+          const metadataRepository = MetadataRepositoryFactory.getRepository(contactMethod.application);
+          const metadata = await metadataRepository.getMetadataForContactMethod(contactMethod.id);
+          return new ContactMethod(
+            contactMethod.id,
+            contactMethod.personId,
+            contactMethod.application,
+            metadata as unknown as Record<string, string | number | boolean>
+          );
+        } catch (error) {
+          // If no metadata found, return contact method with empty metadata
+          return contactMethod;
+        }
+      })
+    );
+
+    return contactMethodsWithMetadata;
   }
 
   async createContactMethod(
