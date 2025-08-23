@@ -2,9 +2,9 @@ import 'dotenv/config';
 import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq, ilike } from 'drizzle-orm';
 import fs from 'node:fs/promises';
-import { contactMethods, people, slackMetadata } from '../schema';
+import { contactMethods, people, peopleContactMethods, slackMetadata } from '../schema';
 
-const WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL!;
+const channelId = 'C0D9VG7M4';
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -66,6 +66,12 @@ async function main() {
   let skipped = 0;
   let usersCreated = 0;
 
+
+  const [cm] = await db
+  .select()
+  .from(contactMethods)
+  .where(eq(contactMethods.applicationName, 'slack'))
+
   for (const row of rows.slice(1)) {
     const name = row[idxName];
     const slackId = row[idxUserId];
@@ -98,36 +104,26 @@ async function main() {
     
     const personId = person[0].id;
 
-    let cm = await db
-      .select()
-      .from(contactMethods)
-      .where(eq(contactMethods.personId, personId))
-      .execute();
-
-    if (cm.length === 0) {
-      const inserted = await db
-        .insert(contactMethods)
-        .values({ personId, application: 'slack' })
-        .returning()
-        .execute();
-      cm = inserted;
-    }
-
-    const res = await db
+    const [sm] = await db
       .insert(slackMetadata)
       .values({
-        contactMethodId: cm[0].id,
-        webhookUrl: WEBHOOK_URL,
+        channelId,
         slackUserId: slackId,
-      })
-      .onConflictDoUpdate({
-        target: [slackMetadata.contactMethodId],
-        set: { webhookUrl: WEBHOOK_URL, slackUserId: slackId },
       })
       .returning()
       .execute();
 
-    if (res.length > 0) {
+    await db
+      .insert(peopleContactMethods)
+      .values({ personId, contactMethodId: cm.id, slackMetadataId: sm?.id ?? null })
+      .onConflictDoUpdate({
+        target: [peopleContactMethods.personId, peopleContactMethods.contactMethodId],
+        set: { 
+          slackMetadataId: sm?.id ?? null,
+         },
+      })
+
+    if (sm) {
       // If we updated existing row, treat as updated; otherwise created
       // This is a simple heuristic: if there was already a row it counts as updated.
       updated++; // counting all as updated to keep output simple

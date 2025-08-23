@@ -5,7 +5,6 @@ import {
   updatePersonByIdBodySchema,
 } from 'birthday-bot-contracts';
 
-import { ContactMethodRepository } from '../ports/output/contact-method.repository';
 import { PersonRepository } from '../ports/output/person.repository';
 import {
   PaginatedPeopleWithContact,
@@ -13,11 +12,12 @@ import {
 } from '../ports/input/people.use-case';
 import { Person } from '../../domain/entities/person';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
+import { PersonContactMethodRepository } from '../ports/output/person-contact-method.repository';
 
 export class PeopleService implements PeopleUseCase {
   constructor(
     private readonly personRepository: PersonRepository,
-    private readonly contactMethodRepository: ContactMethodRepository,
+    private readonly personContactMethodRepository: PersonContactMethodRepository
   ) {}
 
   async createPerson(personPayload: z.infer<typeof createPersonBodySchema>) {
@@ -68,18 +68,10 @@ export class PeopleService implements PeopleUseCase {
   }
 
   async getPersonById(id: number) {
-    const person = await this.personRepository.getPeopleById(id);
-    const contactMethod = await this.contactMethodRepository.getByPersonId(
-      person.id
-    );
-    const metadataRepository = MetadataRepositoryFactory.getRepository(
-      contactMethod.application
-    );
-    const metadata = await metadataRepository.getMetadataForContactMethod(
-      contactMethod.id
-    ).catch(() => {
-      return null;
-    });
-    return { ...person, application: contactMethod.application, metadata };
+    const person = await this.personRepository.getPersonById(id);
+    const contactMethod = await this.personContactMethodRepository.getByPersonId(id);
+    const metadataRepository = MetadataRepositoryFactory.getRepository(contactMethod.contactMethod.applicationName);
+    const metadata = await metadataRepository.getMetadataForContactMethod(contactMethod.contactMethod.id);
+    return { ...person, application: contactMethod.contactMethod.applicationName, metadata: metadata as any }; // TODO: fix this
   }
 }

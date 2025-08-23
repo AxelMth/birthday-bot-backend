@@ -9,6 +9,11 @@ export class MetadataRepositoryFactory {
     ContactMethodMetadataRepository
   > = {
     [Application.Slack]: new SlackMetadataRepository(),
+    // [Application.Email]: new EmailMetadataRepository(),
+    // [Application.Phone]: new PhoneMetadataRepository(),
+    // [Application.Sms]: new SmsMetadataRepository(),
+    // [Application.WhatsApp]: new WhatsAppMetadataRepository(),
+    // [Application.Telegram]: new TelegramMetadataRepository(),
   };
 
   static getRepository(

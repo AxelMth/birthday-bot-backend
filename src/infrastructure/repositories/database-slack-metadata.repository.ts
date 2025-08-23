@@ -23,7 +23,7 @@ export class SlackMetadataRepository
     }
 
     return {
-      webhookUrl: metadata[0].webhookUrl,
+      channelId: metadata[0].channelId,
       userId: metadata[0].slackUserId,
     };
   }
@@ -36,13 +36,13 @@ export class SlackMetadataRepository
       .insert(slackMetadata)
       .values({
         contactMethodId: contactMethodId,
-        webhookUrl: metadata.webhookUrl,
+        channelId: metadata.channelId,
         slackUserId: metadata.userId,
       })
       .onConflictDoUpdate({
         target: [slackMetadata.contactMethodId],
         set: {
-          webhookUrl: metadata.webhookUrl,
+          channelId: metadata.channelId,
           slackUserId: metadata.userId,
         },
       });

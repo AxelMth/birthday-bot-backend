@@ -21,8 +21,7 @@ export const contactMethodsRouter = s.router(contractMethodsContract, {
         body: {
           contactMethods: contactMethods.map((contactMethod) => ({
             id: contactMethod.id,
-            application: contactMethod.application,
-            metadata: contactMethod.metadata as Record<string, string | number | boolean>,
+            applicationName: contactMethod.applicationName,
           })),
         },
       };

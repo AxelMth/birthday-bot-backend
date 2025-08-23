@@ -1,5 +1,5 @@
 import { relations } from 'drizzle-orm';
-import { date, integer, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
+import { date, integer, pgTable, varchar, pgEnum, unique } from 'drizzle-orm/pg-core';
 
 // Enums
 export const contactMethodApplicationEnum = pgEnum('contact_method_application', [
@@ -40,15 +40,12 @@ export const peopleContactMethods = pgTable('people_contact_methods', {
     .references(() => contactMethods.id, { onDelete: 'cascade' }),
   slackMetadataId: integer()
     .references(() => slackMetadata.id, { onDelete: 'cascade' }),
-});
+}, (table) => ({
+  uniquePersonContactMethod: unique().on(table.personId, table.contactMethodId),
+}));
 
 export const slackMetadata = pgTable('slack_metadata', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  contactMethodId: integer()
-    .notNull()
-    .references(() => contactMethods.id, {
-      onDelete: 'cascade',
-    }).unique(),
   channelId: varchar({ length: 255 }).notNull(),
   slackUserId: varchar({ length: 255 }).notNull(),
 });

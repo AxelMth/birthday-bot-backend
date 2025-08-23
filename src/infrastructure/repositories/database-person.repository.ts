@@ -4,16 +4,16 @@ import { PersonRepository } from '../../application/ports/output/person.reposito
 import { db } from '../../db';
 import { people } from '../../db/schema';
 import { Person } from '../../domain/entities/person';
-import { DatabasePersonAdapter } from '../adapters/database-user.adapter';
+import { DatabasePersonAdapter } from '../adapters/database-person.adapter';
 
-export class DatabaseUserRepository implements PersonRepository {
-  async getPeopleById(id: number): Promise<Person> {
-    const [user] = await db
-      .select()
+export class DatabasePersonRepository implements PersonRepository {
+  async getPersonById(id: number): Promise<Person> {
+    const [person] = await db
+      .select() 
       .from(people)
       .where(eq(people.id, id))
       .execute();
-    return DatabasePersonAdapter.toDomain(user);
+    return DatabasePersonAdapter.toDomain(person);
   }
 
   async getPaginatedPeople(
@@ -36,7 +36,7 @@ export class DatabaseUserRepository implements PersonRepository {
       .offset(offset)
       .orderBy(people.name)
       .execute();
-    return _users.map(DatabasePersonAdapter.toDomain);
+    return _users.map(user => DatabasePersonAdapter.toDomain(user));
   }
 
   async getPeopleCount({
@@ -63,7 +63,7 @@ export class DatabaseUserRepository implements PersonRepository {
         sql`date_part('day', "birthDate") = ${day} and date_part('month', "birthDate") = ${month}`
       )
       .execute();
-    return _users.map(DatabasePersonAdapter.toDomain);
+    return _users.map(user => DatabasePersonAdapter.toDomain(user));
   }
 
   async getPeopleByBirthdayRange(
@@ -81,7 +81,7 @@ export class DatabaseUserRepository implements PersonRepository {
         sql`date_part('day', "birthDate") >= ${startDay} and date_part('month', "birthDate") >= ${startMonth} and date_part('day', "birthDate") <= ${endDay} and date_part('month', "birthDate") <= ${endMonth}`
       )
       .execute();
-    return _users.map(DatabasePersonAdapter.toDomain);
+    return _users.map(user => DatabasePersonAdapter.toDomain(user));
   }
 
   async updatePersonById(id: number, person: Person): Promise<void> {

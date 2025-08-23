@@ -5,6 +5,7 @@ import { PersonRepository } from '../ports/output/person.repository';
 import { Application } from '../../domain/value-objects/application';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
 import { Person } from '../../domain/entities/person';
+import { PersonContactMethodRepository } from '../ports/output/person-contact-method.repository';
 
 export class BirthdayService implements BirthdayUseCase {
   private readonly birthdayMessages = [
@@ -31,7 +32,7 @@ export class BirthdayService implements BirthdayUseCase {
       BirthdayMessageRepository
     >,
     private readonly personRepository: PersonRepository,
-    private readonly contactMethodRepository: ContactMethodRepository
+    private readonly personContactMethodRepository: PersonContactMethodRepository
   ) {}
 
   private getRandomBirthdayMessage(): string {
@@ -55,7 +56,7 @@ export class BirthdayService implements BirthdayUseCase {
     }
     let birthdayMessageCount = 0;
     for (const person of people) {
-      const contactMethod = await this.contactMethodRepository.getByPersonId(
+      const {contactMethod, contactMethodMetadata} = await this.personContactMethodRepository.getByPersonId(
         person.id
       );
       if (!contactMethod) {
@@ -63,16 +64,13 @@ export class BirthdayService implements BirthdayUseCase {
         continue;
       }
       const messageRepository =
-        this.messageRepositoriesByApplication[contactMethod.application];
+        this.messageRepositoriesByApplication[contactMethod.applicationName];
       const metadataRepository = MetadataRepositoryFactory.getRepository(
-        contactMethod.application
+        contactMethod.applicationName
       );
 
-      const metadata = await metadataRepository.getMetadataForContactMethod(
-        contactMethod.id
-      );
       const randomMessage = this.getRandomBirthdayMessage();
-      await messageRepository.sendMessage(randomMessage, metadata);
+      await messageRepository.sendMessage(randomMessage, contactMethodMetadata);
       birthdayMessageCount++;
     }
     return {

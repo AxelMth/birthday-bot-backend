@@ -1,24 +1,31 @@
 import { initServer } from '@ts-rest/fastify';
 import { peopleContract } from 'birthday-bot-contracts';
 
-import { DatabaseUserRepository } from '../../infrastructure/repositories/database-person.repository';
+import { DatabasePersonRepository } from '../../infrastructure/repositories/database-person.repository';
 import { DatabaseContactMethodRepository } from '../../infrastructure/repositories/database-contact-method.repository';
 import { PeopleService } from '../../application/services/people.service';
 import { ContactMethodService } from '../../application/services/contact-method.service';
-import { Application } from '../../domain/value-objects/application';
+import { DatabasePersonContactMethodRepository } from '../../infrastructure/repositories/database-person-contact-method.repository';
+import { PeopleContactMethodService } from '../../application/services/people-contact-method.service';
 
 const s = initServer();
 
-const databasePersonRepository = new DatabaseUserRepository();
-const databaseContactMethodRepository = new DatabaseContactMethodRepository();
+const databasePersonRepository = new DatabasePersonRepository();
+const contactMethodRepository = new DatabaseContactMethodRepository();
+const personContactMethodRepository = new DatabasePersonContactMethodRepository();
 
 const peopleService = new PeopleService(
   databasePersonRepository,
-  databaseContactMethodRepository,
+  personContactMethodRepository,
 );
 
 const contactMethodService = new ContactMethodService(
-  databaseContactMethodRepository,
+  contactMethodRepository,
+);
+
+const peopleContactMethodService = new PeopleContactMethodService(
+  databasePersonRepository,
+  personContactMethodRepository
 );
 
 export const peopleRouter = s.router(peopleContract, {
@@ -49,12 +56,7 @@ export const peopleRouter = s.router(peopleContract, {
   updatePersonById: async ({ params, body }) => {
     try {
       const person = await peopleService.updatePersonById(params.id!, body);
-      await contactMethodService.upsertContactMethodByPersonId(params.id!, {
-        id: 0,
-        personId: params.id!,
-        application: body.application as Application,
-        metadata: body.metadata,
-      });
+      await peopleContactMethodService.upsertPersonContactMethod(params.id!, person.contactMethod!, person.contactMethodMetadata! as any); // TODO: fix this
       return {
         status: 200,
         body: person,
@@ -107,7 +109,16 @@ export const peopleRouter = s.router(peopleContract, {
       return {
         status: 200,
         body: {
-          people,
+          people: people.map(person => ({
+            id: person.id,
+            name: person.name,
+            birthdate: person.birthdate,
+            contactMethod: person.contactMethod ? {
+              id: person.contactMethod.id,
+              applicationName: person.contactMethod.applicationName,
+            } : null,
+            contactMethodMetadata: person.contactMethodMetadata || null,
+          })),
           count,
         },
       };

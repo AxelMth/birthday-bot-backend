@@ -1,9 +1,13 @@
 export interface SlackMetadata {
-  webhookUrl: string;
+  channelId: string;
   userId: string;
 }
 
 export type ContactMethodMetadata = {
   slack: SlackMetadata;
-  // Add other app metadata types here
+  // email: EmailMetadata;
+  // phone: PhoneMetadata;
+  // sms: SmsMetadata;
+  // whatsapp: WhatsAppMetadata;
+  // telegram: TelegramMetadata;
 };
