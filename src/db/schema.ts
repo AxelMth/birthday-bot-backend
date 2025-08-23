@@ -1,10 +1,14 @@
-import { relations, sql } from 'drizzle-orm';
+import { relations } from 'drizzle-orm';
 import { date, integer, pgTable, varchar, pgEnum } from 'drizzle-orm/pg-core';
 
 // Enums
-export const contactMethodAppEnum = pgEnum('contact_method_app', [
+export const contactMethodApplicationEnum = pgEnum('contact_method_application', [
   'slack',
   'email',
+  'phone',
+  'sms',
+  'whatsapp',
+  'telegram',
 ]);
 
 export const groupTypeEnum = pgEnum('group_type', [
@@ -23,10 +27,19 @@ export const people = pgTable('people', {
 
 export const contactMethods = pgTable('contact_methods', {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  applicationName: contactMethodApplicationEnum().notNull().unique(),
+});
+
+export const peopleContactMethods = pgTable('people_contact_methods', {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
   personId: integer()
     .notNull()
-    .references(() => people.id, { onDelete: 'cascade' }).unique(),
-  application: contactMethodAppEnum().notNull(),
+    .references(() => people.id, { onDelete: 'cascade' }),
+  contactMethodId: integer()
+    .notNull()
+    .references(() => contactMethods.id, { onDelete: 'cascade' }),
+  slackMetadataId: integer()
+    .references(() => slackMetadata.id, { onDelete: 'cascade' }),
 });
 
 export const slackMetadata = pgTable('slack_metadata', {
@@ -36,7 +49,7 @@ export const slackMetadata = pgTable('slack_metadata', {
     .references(() => contactMethods.id, {
       onDelete: 'cascade',
     }).unique(),
-  webhookUrl: varchar({ length: 255 }).notNull(),
+  channelId: varchar({ length: 255 }).notNull(),
   slackUserId: varchar({ length: 255 }).notNull(),
 });
 
@@ -56,8 +69,8 @@ export const peopleGroups = pgTable('people_groups', {
 });
 
 // Relations
-export const peopleRelations = relations(people, ({ many }) => ({
-  contactMethods: many(contactMethods),
+export const peopleRelations = relations(people, ({ many, one }) => ({
+  contactMethods: one(peopleContactMethods),
   groups: many(peopleGroups),
 }));
 
@@ -65,6 +78,8 @@ export const groupRelations = relations(groups, ({ many }) => ({
   people: many(peopleGroups),
 }));
 
-export const contactMethodRelations = relations(contactMethods, ({ one }) => ({
+export const peopleContactMethodRelations = relations(peopleContactMethods, ({ one }) => ({
+  person: one(people),
+  contactMethod: one(contactMethods),
   slackMetadata: one(slackMetadata),
 }));
