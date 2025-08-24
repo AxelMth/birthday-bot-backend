@@ -13,9 +13,9 @@ export class SlackBirthdayMessageRepository
   private readonly slackToken: string;
 
   constructor() {
-    this.slackToken = process.env.SLACK_BOT_TOKEN || process.env.SLACK_USER_OAUTH_TOKEN || '';
+    this.slackToken = process.env.SLACK_BOT_USER_OAUTH_TOKEN || process.env.SLACK_USER_OAUTH_TOKEN || '';
     if (!this.slackToken) {
-      throw new Error('SLACK_BOT_TOKEN or SLACK_USER_OAUTH_TOKEN environment variable is required');
+      throw new Error('SLACK_BOT_USER_OAUTH_TOKEN or SLACK_USER_OAUTH_TOKEN environment variable is required');
     }
   }
 
