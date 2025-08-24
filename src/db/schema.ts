@@ -6,6 +6,7 @@ import {
   varchar,
   pgEnum,
   unique,
+  text,
 } from "drizzle-orm/pg-core";
 
 // Enums
@@ -76,10 +77,21 @@ export const peopleGroups = pgTable("people_groups", {
     .references(() => groups.id, { onDelete: "cascade" }),
 });
 
+export const communications  = pgTable("communications", {
+  personId: integer()
+    .notNull()
+    .references(() => people.id, { onDelete: "cascade" }),
+  contactMethodId: integer()
+    .notNull()
+    .references(() => contactMethods.id, { onDelete: "cascade" }),
+  message: text().notNull(),
+});
+
 // Relations
 export const peopleRelations = relations(people, ({ many, one }) => ({
-  contactMethods: one(peopleContactMethods),
+  contactMethod: one(peopleContactMethods),
   groups: many(peopleGroups),
+  communications: many(communications),
 }));
 
 export const groupRelations = relations(groups, ({ many }) => ({
@@ -92,5 +104,13 @@ export const peopleContactMethodRelations = relations(
     person: one(people),
     contactMethod: one(contactMethods),
     slackMetadata: one(slackMetadata),
+  }),
+);
+
+export const communicationRelations = relations(
+  communications,
+  ({ one }) => ({
+    person: one(people),
+    contactMethod: one(contactMethods),
   }),
 );
