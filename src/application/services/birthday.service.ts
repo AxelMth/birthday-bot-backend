@@ -1,11 +1,8 @@
 import { BirthdayUseCase } from '../ports/input/birthday.use-case';
 import { BirthdayMessageRepository } from '../ports/output/message.repository';
-import { ContactMethodRepository } from '../ports/output/contact-method.repository';
 import { PersonRepository } from '../ports/output/person.repository';
 import { Application } from '../../domain/value-objects/application';
-import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
 import { Person } from '../../domain/entities/person';
-import { PersonContactMethodRepository } from '../ports/output/person-contact-method.repository';
 
 export class BirthdayService implements BirthdayUseCase {
   private readonly birthdayMessages = [
@@ -31,8 +28,7 @@ export class BirthdayService implements BirthdayUseCase {
       Application,
       BirthdayMessageRepository
     >,
-    private readonly personRepository: PersonRepository,
-    private readonly personContactMethodRepository: PersonContactMethodRepository
+    private readonly personRepository: PersonRepository
   ) {}
 
   private getRandomBirthdayMessage(): string {
@@ -41,14 +37,14 @@ export class BirthdayService implements BirthdayUseCase {
   }
 
   async getNextBirthdaysUntil(date: Date): Promise<Person[]> {
-    return this.personRepository.getPeopleByBirthdayRange(new Date(), date);
+    return this.personRepository.getByBirthdayRange(new Date(), date);
   }
 
   async sendTodayBirthdayMessages(): Promise<{
     birthdayMessageCount: number;
     people?: Person[];
   }> {
-    const people = await this.personRepository.getPeopleByBirthday(new Date());
+    const people = await this.personRepository.getByBirthday(new Date());
     if (people.length === 0) {
       return {
         birthdayMessageCount: 0,
@@ -56,22 +52,29 @@ export class BirthdayService implements BirthdayUseCase {
     }
     let birthdayMessageCount = 0;
     for (const person of people) {
-      const {contactMethod, contactMethodMetadata} = await this.personContactMethodRepository.getByPersonId(
-        person.id
-      );
-      if (!contactMethod) {
+      if (!person.preferredContact) {
         console.error(`No contact method found for person ${person.id}`);
         continue;
       }
-      const messageRepository =
-        this.messageRepositoriesByApplication[contactMethod.applicationName];
-      const metadataRepository = MetadataRepositoryFactory.getRepository(
-        contactMethod.applicationName
-      );
+      
+      const messageRepository = this.messageRepositoriesByApplication[person.preferredContact.kind];
+      if (!messageRepository) {
+        console.error(`No message repository found for application ${person.preferredContact.kind}`);
+        continue;
+      }
 
       const randomMessage = this.getRandomBirthdayMessage();
-      await messageRepository.sendMessage(randomMessage, contactMethodMetadata);
-      birthdayMessageCount++;
+      
+      // Convert ContactChannel to the format expected by the message repository
+      if (person.preferredContact.kind === Application.Slack) {
+        const slackMetadata = {
+          id: 0, // Not used by message repository
+          channelId: person.preferredContact.info.channelId,
+          userId: person.preferredContact.info.userId,
+        };
+        await messageRepository.sendMessage(randomMessage, slackMetadata);
+        birthdayMessageCount++;
+      }
     }
     return {
       birthdayMessageCount,

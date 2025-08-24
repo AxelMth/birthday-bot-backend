@@ -1,8 +1,11 @@
 import * as z from 'zod';
-import { getPeopleQuerySchema } from 'birthday-bot-contracts';
+import { 
+  getPeopleQuerySchema,
+  createPersonBodySchema,
+  updatePersonByIdBodySchema 
+} from 'birthday-bot-contracts';
 
 import { Person } from '../../../domain/entities/person';
-
 
 export interface PeopleUseCase {
   getPaginatedPeople(
@@ -12,8 +15,9 @@ export interface PeopleUseCase {
     count: number;
   }>;
   getPersonById(id: number): Promise<Person>;
+  createPerson(personPayload: z.infer<typeof createPersonBodySchema>): Promise<Person>;
   updatePersonById(
     id: number,
-    person: Person
+    personPayload: z.infer<typeof updatePersonByIdBodySchema>
   ): Promise<Person>;
 }

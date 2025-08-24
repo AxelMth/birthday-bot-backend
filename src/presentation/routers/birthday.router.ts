@@ -4,12 +4,10 @@ import { birthdayContract } from 'birthday-bot-contracts';
 import { DatabasePersonRepository } from '../../infrastructure/repositories/database-person.repository';
 import { SlackBirthdayMessageRepository } from '../../infrastructure/repositories/slack-birthday-message.repository';
 import { BirthdayService } from '../../application/services/birthday.service';
-import { DatabasePersonContactMethodRepository } from '../../infrastructure/repositories/database-person-contact-method.repository';
 
 const s = initServer();
 
 const databasePersonRepository = new DatabasePersonRepository();
-const databasePersonContactMethodRepository = new DatabasePersonContactMethodRepository();
 
 const messageRepositoriesByApplication = {
   slack: new SlackBirthdayMessageRepository(),
@@ -17,8 +15,7 @@ const messageRepositoriesByApplication = {
 
 const birthdayService = new BirthdayService(
   messageRepositoriesByApplication,
-  databasePersonRepository,
-  databasePersonContactMethodRepository
+  databasePersonRepository
 );
 
 export const birthdayRouter = s.router(birthdayContract, {

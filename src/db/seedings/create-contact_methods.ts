@@ -10,8 +10,7 @@ async function main() {
   for (const person of _people) {
     console.log(`Creating contact methods for ${person.name}`);
     await db.insert(contactMethods).values({
-      personId: person.id,
-      application: 'slack',
+      applicationName: 'slack',
     });
   }
 }

@@ -11,6 +11,7 @@ export class DatabaseContactMethodAdapter {
     return new ContactMethod(
       contactMethod.id,
       contactMethod.applicationName as Application,
+      {} // Empty metadata since it's handled separately
     );
   }
 

@@ -2,31 +2,39 @@ import { initServer } from '@ts-rest/fastify';
 import { peopleContract } from 'birthday-bot-contracts';
 
 import { DatabasePersonRepository } from '../../infrastructure/repositories/database-person.repository';
-import { DatabaseContactMethodRepository } from '../../infrastructure/repositories/database-contact-method.repository';
 import { PeopleService } from '../../application/services/people.service';
-import { ContactMethodService } from '../../application/services/contact-method.service';
-import { DatabasePersonContactMethodRepository } from '../../infrastructure/repositories/database-person-contact-method.repository';
-import { PeopleContactMethodService } from '../../application/services/people-contact-method.service';
+import { Application } from '../../domain/value-objects/application';
 
 const s = initServer();
 
 const databasePersonRepository = new DatabasePersonRepository();
-const contactMethodRepository = new DatabaseContactMethodRepository();
-const personContactMethodRepository = new DatabasePersonContactMethodRepository();
+const peopleService = new PeopleService(databasePersonRepository);
 
-const peopleService = new PeopleService(
-  databasePersonRepository,
-  personContactMethodRepository,
-);
+// Helper function to convert domain to DTO
+function toPersonDTO(person: any) {
+  let application: string | undefined;
+  let applicationMetadata: Record<string, string> | undefined;
 
-const contactMethodService = new ContactMethodService(
-  contactMethodRepository,
-);
+  if (person.preferredContact) {
+    switch (person.preferredContact.kind) {
+      case Application.Slack:
+        application = Application.Slack;
+        applicationMetadata = {
+          channelId: person.preferredContact.info.channelId,
+          userId: person.preferredContact.info.userId,
+        };
+        break;
+    }
+  }
 
-const peopleContactMethodService = new PeopleContactMethodService(
-  databasePersonRepository,
-  personContactMethodRepository
-);
+  return {
+    id: person.id,
+    name: person.name,
+    birthDate: person.birthDate?.toISOString().split('T')[0],
+    application,
+    applicationMetadata,
+  };
+}
 
 export const peopleRouter = s.router(peopleContract, {
   createPerson: async ({ body }) => {
@@ -34,7 +42,7 @@ export const peopleRouter = s.router(peopleContract, {
       const person = await peopleService.createPerson(body);
       return {
         status: 200,
-        body: person,
+        body: toPersonDTO(person),
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -56,10 +64,9 @@ export const peopleRouter = s.router(peopleContract, {
   updatePersonById: async ({ params, body }) => {
     try {
       const person = await peopleService.updatePersonById(params.id!, body);
-      await peopleContactMethodService.upsertPersonContactMethod(params.id!, person.contactMethod!, person.contactMethodMetadata! as any); // TODO: fix this
       return {
         status: 200,
-        body: person,
+        body: toPersonDTO(person),
       };
     } catch (error) {
       console.error(error);
@@ -84,13 +91,7 @@ export const peopleRouter = s.router(peopleContract, {
       const person = await peopleService.getPersonById(params.id!);
       return {
         status: 200,
-        body: {
-          id: person.id,
-          name: person.name,
-          birthDate: person.birthDate?.toISOString().split('T')[0],
-          application: person.contactMethod?.applicationName,
-          applicationMetadata: person.contactMethodMetadata as unknown as Record<string, string>, // TODO: fix this
-        },
+        body: toPersonDTO(person),
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -115,13 +116,7 @@ export const peopleRouter = s.router(peopleContract, {
       return {
         status: 200,
         body: {
-          people: people.map(person => ({
-            id: person.id,
-            name: person.name,
-            birthDate: person.birthDate?.toISOString().split('T')[0],
-            application: person.contactMethod?.applicationName,
-            applicationMetadata: person.contactMethodMetadata as unknown as Record<string, string>, // TODO: fix this
-          })),
+          people: people.map(toPersonDTO),
           count,
         },
       };

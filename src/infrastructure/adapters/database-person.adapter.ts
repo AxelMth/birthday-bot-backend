@@ -9,10 +9,10 @@ interface DatabasePerson {
 export class DatabasePersonAdapter {
   static toDomain(user: DatabasePerson): Person {
     if (!user.birthDate) {
-      return new Person(user.id, user.name, undefined, undefined, undefined);
+      return new Person(user.id, user.name, undefined);
     }
     const [year, month, day] = user.birthDate.split('-').map(Number);
     const birthDate = new Date(Date.UTC(year, month - 1, day));
-    return new Person(user.id, user.name, birthDate, undefined, undefined);
+    return new Person(user.id, user.name, birthDate);
   }
 }
