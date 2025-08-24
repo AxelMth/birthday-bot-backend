@@ -21,7 +21,8 @@ export class SlackBirthdayMessageRepository
 
   async sendMessage(message: string, metadata: SlackMetadata): Promise<void> {
     try {
-      const text = `${message} <@${metadata.userId}>`;
+      // Replace {name} placeholder with Slack user mention
+      const text = message.replace(/{name}/g, `<@${metadata.userId}>`);
       
       const response = await axios.post('https://slack.com/api/chat.postMessage', {
         channel: metadata.channelId,
