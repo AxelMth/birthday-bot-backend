@@ -13,6 +13,19 @@ const server = Fastify({
   logger: true,
 });
 
+// Add error handler to ignore empty body errors on DELETE requests
+server.setErrorHandler((error, request, reply) => {
+  // Ignore FST_ERR_CTP_EMPTY_JSON_BODY for DELETE requests
+  if (error.code === 'FST_ERR_CTP_EMPTY_JSON_BODY' && request.method === 'DELETE') {
+    // Continue processing the request as if no error occurred
+    return;
+  }
+  
+  // For all other errors, use default error handling
+  server.log.error(error);
+  reply.status(500).send({ error: 'Internal Server Error' });
+});
+
 // cors
 server.register(import('@fastify/cors'), {
   origin: '*',
