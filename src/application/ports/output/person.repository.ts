@@ -6,6 +6,8 @@ export interface PersonRepository {
     search?: string;
     limit: number;
     offset: number;
+    sort?: "birthDate" | "name";
+    order?: "asc" | "desc";
   }): Promise<Person[]>;
   count(params: { search?: string }): Promise<number>;
   getByBirthday(date: Date): Promise<Person[]>;

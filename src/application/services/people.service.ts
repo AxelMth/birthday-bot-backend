@@ -67,10 +67,14 @@ export class PeopleService implements PeopleUseCase {
     const peopleCount = await this.personRepository.count(searchParams);
     const limit = query.pageSize ?? 10;
     const offset = (query.pageSize ?? 10) * ((query.pageNumber ?? 1) - 1);
+    const sort = query.sortBy;
+    const order = query.sortOrder;
     const people = await this.personRepository.getPaginated({
       limit,
       offset,
       ...searchParams,
+      sort,
+      order,
     });
     return {
       people,

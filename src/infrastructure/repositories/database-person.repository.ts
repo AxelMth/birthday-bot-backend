@@ -1,4 +1,4 @@
-import { sql, count, eq, and, inArray } from "drizzle-orm";
+import { sql, count, eq, and, inArray, asc, desc } from "drizzle-orm";
 
 import { PersonRepository } from "../../application/ports/output/person.repository";
 import { db } from "../../db";
@@ -136,16 +136,20 @@ export class DatabasePersonRepository implements PersonRepository {
     search?: string;
     limit: number;
     offset: number;
+    sort?: "birthDate" | "name";
+    order?: "asc" | "desc";
   }): Promise<Person[]> {
+    const sortBy = params.sort === "birthDate" ? people.birthDate : people.name;
+    const orderBy = params.order === "asc" ? asc(sortBy) : desc(sortBy);
     const peopleRows = await db
       .select({ id: people.id })
       .from(people)
       .where(
         params.search ? sql`name ILIKE ${`%${params.search}%`}` : undefined,
       )
+      .orderBy(orderBy)
       .limit(params.limit)
-      .offset(params.offset)
-      .orderBy(people.name);
+      .offset(params.offset);
 
     const personIds = peopleRows.map((row) => row.id);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);
