@@ -7,6 +7,7 @@ import {
   pgEnum,
   unique,
   text,
+  timestamp,
 } from "drizzle-orm/pg-core";
 
 // Enums
@@ -78,6 +79,7 @@ export const peopleGroups = pgTable("people_groups", {
 });
 
 export const communications  = pgTable("communications", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
   personId: integer()
     .notNull()
     .references(() => people.id, { onDelete: "cascade" }),
@@ -85,6 +87,7 @@ export const communications  = pgTable("communications", {
     .notNull()
     .references(() => contactMethods.id, { onDelete: "cascade" }),
   message: text().notNull(),
+  sentAt: timestamp({ withTimezone: true }).defaultNow().notNull(),
 });
 
 // Relations
