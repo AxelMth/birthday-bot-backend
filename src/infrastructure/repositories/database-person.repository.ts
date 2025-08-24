@@ -1,4 +1,4 @@
-import { sql, count, eq, and } from 'drizzle-orm';
+import { sql, count, eq, and, inArray } from 'drizzle-orm';
 
 import { PersonRepository } from '../../application/ports/output/person.repository';
 import { db } from '../../db';
@@ -64,7 +64,7 @@ export class DatabasePersonRepository implements PersonRepository {
       .leftJoin(peopleContactMethods, eq(people.id, peopleContactMethods.personId))
       .leftJoin(contactMethods, eq(peopleContactMethods.contactMethodId, contactMethods.id))
       .leftJoin(slackMetadata, eq(peopleContactMethods.slackMetadataId, slackMetadata.id))
-      .where(sql`${people.id} = ANY(${personIds})`);
+      .where(inArray(people.id, personIds));
 
     const personsMap = new Map<number, Person>();
 
@@ -92,6 +92,7 @@ export class DatabasePersonRepository implements PersonRepository {
     // Return in original order
     return personIds.map(id => personsMap.get(id)!).filter(Boolean);
   }
+
   async getById(id: number): Promise<Person> {
     return await this.hydratePersonWithContactChannel(id);
   }
@@ -108,6 +109,7 @@ export class DatabasePersonRepository implements PersonRepository {
       .orderBy(people.name);
     
     const personIds = peopleRows.map(row => row.id);
+    console.log('personIds', personIds);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);
   }
 
