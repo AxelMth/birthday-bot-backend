@@ -62,6 +62,10 @@ export class PeopleService implements PeopleUseCase {
     return await this.personRepository.getById(id);
   }
 
+  async deletePersonById(id: number) {
+    await this.personRepository.delete(id);
+  }
+
   async getPaginatedPeople(
     query: z.infer<typeof getPeopleQuerySchema>
   ) {

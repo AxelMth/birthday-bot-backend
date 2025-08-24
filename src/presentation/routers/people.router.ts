@@ -137,4 +137,30 @@ export const peopleRouter = s.router(peopleContract, {
       };
     }
   },
+  deletePersonById: async ({ params }) => {
+    try {
+      await peopleService.deletePersonById(params.id!);
+      return {
+        status: 200,
+        body: {
+          success: true,
+        },
+      };
+    } catch (error) {
+      if (error instanceof Error) {
+        return {
+          status: 500,
+          body: {
+            error: error.message,
+          },
+        };
+      }
+      return {
+        status: 500,
+        body: {
+          error: 'An error occurred',
+        },
+      };
+    }
+  },
 });

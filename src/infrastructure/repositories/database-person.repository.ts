@@ -202,6 +202,10 @@ export class DatabasePersonRepository implements PersonRepository {
     });
   }
 
+  async delete(id: number): Promise<void> {
+    await db.delete(people).where(eq(people.id, id));
+  }
+
   private async upsertContactChannel(tx: any, personId: number, contactChannel: ContactChannel): Promise<void> {
     if (contactChannel.kind === Application.Slack) {
       // Get or create contact method id

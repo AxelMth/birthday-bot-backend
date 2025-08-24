@@ -8,4 +8,5 @@ export interface PersonRepository {
   getByBirthdayRange(start: Date, end: Date): Promise<Person[]>;
   save(person: Person): Promise<void>; // upsert full aggregate (profile + preferredContact)
   create(person: Person): Promise<Person>;
+  delete(id: number): Promise<void>;
 }
