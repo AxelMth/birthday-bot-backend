@@ -89,7 +89,7 @@ export class DatabasePersonRepository implements PersonRepository {
       .update(people)
       .set({
         name: person.name,
-        ...(person.birthdate ? { birthDate: person.birthdate.toISOString().split('T')[0] } : {}),
+        ...(person.birthDate ? { birthDate: person.birthDate.toISOString().split('T')[0] } : {}),
       })
       .where(eq(people.id, id))
       .execute();

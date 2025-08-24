@@ -84,7 +84,13 @@ export const peopleRouter = s.router(peopleContract, {
       const person = await peopleService.getPersonById(params.id!);
       return {
         status: 200,
-        body: person,
+        body: {
+          id: person.id,
+          name: person.name,
+          birthDate: person.birthDate?.toISOString().split('T')[0],
+          application: person.contactMethod?.applicationName,
+          applicationMetadata: person.contactMethodMetadata as unknown as Record<string, string>, // TODO: fix this
+        },
       };
     } catch (error) {
       if (error instanceof Error) {
@@ -113,8 +119,8 @@ export const peopleRouter = s.router(peopleContract, {
             id: person.id,
             name: person.name,
             birthDate: person.birthDate?.toISOString().split('T')[0],
-            application: person.application,
-            applicationMetadata: person.metadata as any, // TODO: fix this
+            application: person.contactMethod?.applicationName,
+            applicationMetadata: person.contactMethodMetadata as unknown as Record<string, string>, // TODO: fix this
           })),
           count,
         },

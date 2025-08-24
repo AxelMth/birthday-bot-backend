@@ -7,6 +7,13 @@ import { eq } from 'drizzle-orm';
 export class SlackMetadataRepository
   implements ContactMethodMetadataRepository<SlackMetadata>
 {
+  getMetadata(): Record<string, string> {
+    return {
+        "channelId": "string",
+        "userId": "string",
+    }
+  }
+
   async getById(
     id: number
   ): Promise<SlackMetadata> {

@@ -4,5 +4,6 @@ export class ContactMethod {
   constructor(
     public readonly id: number,
     public readonly applicationName: Application,
+    public readonly applicationMetadata: Record<string, string>,
   ) {}
 }

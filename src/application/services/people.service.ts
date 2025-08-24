@@ -7,12 +7,14 @@ import {
 
 import { PersonRepository } from '../ports/output/person.repository';
 import {
-  PaginatedPeopleWithContact,
   PeopleUseCase,
 } from '../ports/input/people.use-case';
 import { Person } from '../../domain/entities/person';
 import { MetadataRepositoryFactory } from '../../infrastructure/factories/metadata-repository.factory';
 import { PersonContactMethodRepository } from '../ports/output/person-contact-method.repository';
+import { ContactMethodMetadata } from '../../domain/value-objects/contact-method-metadata';
+import { ContactMethod } from '../../domain/entities/contact-method';
+import { Application } from '../../domain/value-objects/application';
 
 export class PeopleService implements PeopleUseCase {
   constructor(
@@ -37,15 +39,30 @@ export class PeopleService implements PeopleUseCase {
     const personToUpdate = new Person(
       id,
       personPayload.name!,
-      personPayload.birthdate!
+      personPayload.birthdate!,
     );
+    // We need to update the person and the contact method
     await this.personRepository.updatePersonById(id, personToUpdate);
+    const contactMethod = await this.personContactMethodRepository.getByPersonId(id);
+    if (!contactMethod) {
+      await this.personContactMethodRepository.createContactMethod(id, new ContactMethod(
+        0,
+        personPayload.application! as Application,
+        personPayload.applicationMetadata! as unknown as Record<string, string> // TODO: fix this
+      ));
+    } else if (contactMethod.contactMethod.applicationName !== personPayload.application) {
+      await this.personContactMethodRepository.updateContactMethodById(id, new ContactMethod(
+        contactMethod.contactMethod.id,
+        personPayload.application! as Application,
+        personPayload.applicationMetadata! as unknown as Record<string, string> // TODO: fix this
+      ));
+    }
     return this.getPersonById(id);
   }
 
   async getPaginatedPeople(
     query: z.infer<typeof getPeopleQuerySchema>
-  ): Promise<PaginatedPeopleWithContact> {
+  ) {
     const peopleCount = await this.personRepository.getPeopleCount({
       ...(query.search ? { search: query.search } : {}),
     });
@@ -61,7 +78,7 @@ export class PeopleService implements PeopleUseCase {
         return this.getPersonById(person.id);
       })
     );
-    return {
+    return {  
       people: peopleWithContactMethods,
       count: peopleCount,
     };
@@ -71,14 +88,32 @@ export class PeopleService implements PeopleUseCase {
     const person = await this.personRepository.getPersonById(id);
     const personContactMethod = await this.personContactMethodRepository.getByPersonId(id);
     if (!personContactMethod) {
-      return { ...person, application: null, metadata: null };
+      return new Person(
+        person.id,
+        person.name,
+        person.birthDate,
+        null,
+        null
+      );
     }
     const { contactMethod, contactMethodMetadata } = personContactMethod;
     if (!contactMethodMetadata) {
-      return { ...person, application: contactMethod.applicationName, metadata: null };
+      return new Person(
+        person.id,
+        person.name,
+        person.birthDate,
+        contactMethod,
+        null
+      );
     }
     const metadataRepository = MetadataRepositoryFactory.getRepository(contactMethod.applicationName);
     const metadata = await metadataRepository.getById(contactMethodMetadata.id);
-    return { ...person, application: contactMethod.applicationName, metadata: metadata as any }; // TODO: fix this
+    return new Person(
+      person.id,
+      person.name,
+      person.birthDate,
+      contactMethod,
+      metadata as unknown as ContactMethodMetadata // TODO: fix this
+    );
   }
 }
