@@ -109,7 +109,6 @@ export class DatabasePersonRepository implements PersonRepository {
       .orderBy(people.name);
     
     const personIds = peopleRows.map(row => row.id);
-    console.log('personIds', personIds);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);
   }
 
