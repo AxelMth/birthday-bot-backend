@@ -7,40 +7,40 @@ import { eq } from 'drizzle-orm';
 export class SlackMetadataRepository
   implements ContactMethodMetadataRepository<SlackMetadata>
 {
-  async getMetadataForContactMethod(
-    contactMethodId: number
+  async getById(
+    id: number
   ): Promise<SlackMetadata> {
-    const metadata = await db
+    const [metadata] = await db
         .select()
         .from(slackMetadata)
-      .where(eq(slackMetadata.contactMethodId, contactMethodId))
+      .where(eq(slackMetadata.id, id))
       .execute();
 
-    if (!metadata[0]) {
+    if (!metadata) {
       throw new Error(
-        `No slack metadata found for contactMethod ${contactMethodId}`
+        `No slack metadata found for id ${id}`
       );
     }
 
     return {
-      channelId: metadata[0].channelId,
-      userId: metadata[0].slackUserId,
+      id: metadata.id,
+      channelId: metadata.channelId,
+      userId: metadata.slackUserId,
     };
   }
 
-  async upsertMetadataForContactMethod(
-    contactMethodId: number,
+  async upsert(
+    id: number,
     metadata: SlackMetadata
   ): Promise<void> {
     await db
       .insert(slackMetadata)
       .values({
-        contactMethodId: contactMethodId,
         channelId: metadata.channelId,
         slackUserId: metadata.userId,
       })
       .onConflictDoUpdate({
-        target: [slackMetadata.contactMethodId],
+        target: [slackMetadata.id],
         set: {
           channelId: metadata.channelId,
           slackUserId: metadata.userId,

@@ -1,7 +1,7 @@
 export interface ContactMethodMetadataRepository<T = unknown> {
-  getMetadataForContactMethod(contactMethodId: number): Promise<T>;
-  upsertMetadataForContactMethod(
-    contactMethodId: number,
+  getById(id: number): Promise<T>;
+  upsert(
+    id: number,
     metadata: T
   ): Promise<void>;
 }

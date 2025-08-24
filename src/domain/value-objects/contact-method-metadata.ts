@@ -1,4 +1,5 @@
 export interface SlackMetadata {
+  id: number;
   channelId: string;
   userId: string;
 }

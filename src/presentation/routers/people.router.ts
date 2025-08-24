@@ -112,12 +112,9 @@ export const peopleRouter = s.router(peopleContract, {
           people: people.map(person => ({
             id: person.id,
             name: person.name,
-            birthdate: person.birthdate,
-            contactMethod: person.contactMethod ? {
-              id: person.contactMethod.id,
-              applicationName: person.contactMethod.applicationName,
-            } : null,
-            contactMethodMetadata: person.contactMethodMetadata || null,
+            birthDate: person.birthDate?.toISOString().split('T')[0],
+            application: person.application,
+            applicationMetadata: person.metadata as any, // TODO: fix this
           })),
           count,
         },

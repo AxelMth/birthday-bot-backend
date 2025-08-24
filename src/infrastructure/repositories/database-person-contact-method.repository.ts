@@ -19,6 +19,7 @@ export class DatabasePersonContactMethodRepository implements PersonContactMetho
       .select({
         contactMethodId: contactMethods.id,
         applicationName: contactMethods.applicationName,
+        slackMetadataId: slackMetadata.id,
         channelId: slackMetadata.channelId,
         slackUserId: slackMetadata.slackUserId,
       })
@@ -35,7 +36,7 @@ export class DatabasePersonContactMethodRepository implements PersonContactMetho
     });
 
     const contactMethodMetadata = result.channelId && result.slackUserId 
-      ? { channelId: result.channelId, userId: result.slackUserId }
+      ? { id: result.slackMetadataId, channelId: result.channelId, userId: result.slackUserId }
       : null;
 
     return {

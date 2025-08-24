@@ -69,9 +69,16 @@ export class PeopleService implements PeopleUseCase {
 
   async getPersonById(id: number) {
     const person = await this.personRepository.getPersonById(id);
-    const contactMethod = await this.personContactMethodRepository.getByPersonId(id);
-    const metadataRepository = MetadataRepositoryFactory.getRepository(contactMethod.contactMethod.applicationName);
-    const metadata = await metadataRepository.getMetadataForContactMethod(contactMethod.contactMethod.id);
-    return { ...person, application: contactMethod.contactMethod.applicationName, metadata: metadata as any }; // TODO: fix this
+    const personContactMethod = await this.personContactMethodRepository.getByPersonId(id);
+    if (!personContactMethod) {
+      return { ...person, application: null, metadata: null };
+    }
+    const { contactMethod, contactMethodMetadata } = personContactMethod;
+    if (!contactMethodMetadata) {
+      return { ...person, application: contactMethod.applicationName, metadata: null };
+    }
+    const metadataRepository = MetadataRepositoryFactory.getRepository(contactMethod.applicationName);
+    const metadata = await metadataRepository.getById(contactMethodMetadata.id);
+    return { ...person, application: contactMethod.applicationName, metadata: metadata as any }; // TODO: fix this
   }
 }

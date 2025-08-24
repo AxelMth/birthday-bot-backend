@@ -5,7 +5,7 @@ export class Person {
   constructor(
     public readonly id: number,
     public readonly name: string,
-    public readonly birthdate?: Date,
+    public readonly birthDate?: Date,
     public readonly contactMethod?: ContactMethod,
     public readonly contactMethodMetadata?: ContactMethodMetadata
   ) {}

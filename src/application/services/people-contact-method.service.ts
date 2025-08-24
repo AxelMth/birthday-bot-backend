@@ -24,13 +24,13 @@ export class PeopleContactMethodService {
     }
 
     const metadataRepository = MetadataRepositoryFactory.getRepository(contactMethodData.contactMethod.applicationName);
-    const contactMethodMetadata = await metadataRepository.getMetadataForContactMethod(contactMethodData.contactMethod.id);
+    const contactMethodMetadata = await metadataRepository.getById(contactMethodData.contactMethodMetadata.id);
 
     // Create a new Person with contact method data
     return new Person(
       person.id,
       person.name,
-      person.birthdate,
+      person.birthDate,
       contactMethodData.contactMethod,
       contactMethodMetadata as any // TODO: fix this
     );
@@ -74,8 +74,8 @@ export class PeopleContactMethodService {
         contactMethod,
         0 // You'll need to handle metadata ID properly
       );
-      await metadataRepository.upsertMetadataForContactMethod(
-        createdRelation.contactMethod.id,
+      await metadataRepository.upsert(
+        createdRelation.contactMethodMetadata.id,
         contactMethodMetadata
       );
     } else {
@@ -83,8 +83,8 @@ export class PeopleContactMethodService {
         personId,
         contactMethod
       );
-      await metadataRepository.upsertMetadataForContactMethod(
-        existingContactMethod.contactMethod.id,
+      await metadataRepository.upsert(
+        existingContactMethod.contactMethodMetadata.id,
         contactMethodMetadata as any // TODO: fix this
       );
     }
