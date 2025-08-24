@@ -1,7 +1,7 @@
-import { ContactMethodMetadataRepository } from '../../application/ports/output/metadata.repository';
-import { Application } from '../../domain/value-objects/application';
-import { ContactMethodMetadata } from '../../domain/value-objects/contact-method-metadata';
-import { SlackMetadataRepository } from '../repositories/database-slack-metadata.repository';
+import { ContactMethodMetadataRepository } from "../../application/ports/output/metadata.repository";
+import { Application } from "../../domain/value-objects/application";
+import { ContactMethodMetadata } from "../../domain/value-objects/contact-method-metadata";
+import { SlackMetadataRepository } from "../repositories/database-slack-metadata.repository";
 
 export class MetadataRepositoryFactory {
   private static repositories: Record<
@@ -17,7 +17,7 @@ export class MetadataRepositoryFactory {
   };
 
   static getRepository(
-    app: Application
+    app: Application,
   ): ContactMethodMetadataRepository<
     ContactMethodMetadata[keyof ContactMethodMetadata]
   > {

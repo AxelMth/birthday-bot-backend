@@ -1,4 +1,4 @@
-import { Person } from '../../domain/entities/person';
+import { Person } from "../../domain/entities/person";
 
 interface DatabasePerson {
   id: number;
@@ -11,7 +11,7 @@ export class DatabasePersonAdapter {
     if (!user.birthDate) {
       return new Person(user.id, user.name, undefined);
     }
-    const [year, month, day] = user.birthDate.split('-').map(Number);
+    const [year, month, day] = user.birthDate.split("-").map(Number);
     const birthDate = new Date(Date.UTC(year, month - 1, day));
     return new Person(user.id, user.name, birthDate);
   }

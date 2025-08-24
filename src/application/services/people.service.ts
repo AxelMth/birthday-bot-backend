@@ -1,22 +1,18 @@
-import * as z from 'zod';
+import * as z from "zod";
 import {
   getPeopleQuerySchema,
   createPersonBodySchema,
   updatePersonByIdBodySchema,
-} from 'birthday-bot-contracts';
+} from "birthday-bot-contracts";
 
-import { PersonRepository } from '../ports/output/person.repository';
-import {
-  PeopleUseCase,
-} from '../ports/input/people.use-case';
-import { Person } from '../../domain/entities/person';
-import { Application } from '../../domain/value-objects/application';
-import { ContactChannel } from '../../domain/value-objects/contact-info';
+import { PersonRepository } from "../ports/output/person.repository";
+import { PeopleUseCase } from "../ports/input/people.use-case";
+import { Person } from "../../domain/entities/person";
+import { Application } from "../../domain/value-objects/application";
+import { ContactChannel } from "../../domain/value-objects/contact-info";
 
 export class PeopleService implements PeopleUseCase {
-  constructor(
-    private readonly personRepository: PersonRepository
-  ) {}
+  constructor(private readonly personRepository: PersonRepository) {}
 
   private toContactChannel(body: {
     application?: string;
@@ -28,8 +24,8 @@ export class PeopleService implements PeopleUseCase {
         return {
           kind: Application.Slack,
           info: {
-            channelId: String(body.applicationMetadata?.channelId ?? ''),
-            userId: String(body.applicationMetadata?.userId ?? ''),
+            channelId: String(body.applicationMetadata?.channelId ?? ""),
+            userId: String(body.applicationMetadata?.userId ?? ""),
           },
         };
       default:
@@ -41,16 +37,16 @@ export class PeopleService implements PeopleUseCase {
     const person = new Person(
       0,
       personPayload.name!,
-      personPayload.birthDate ? new Date(personPayload.birthDate) : undefined
-    );  
-    person.setPreferredContact(this.toContactChannel(personPayload)); 
+      personPayload.birthDate ? new Date(personPayload.birthDate) : undefined,
+    );
+    person.setPreferredContact(this.toContactChannel(personPayload));
     const created = await this.personRepository.create(person);
     return await this.personRepository.getById(created.id);
   }
 
   async updatePersonById(
     id: number,
-    personPayload: z.infer<typeof updatePersonByIdBodySchema>
+    personPayload: z.infer<typeof updatePersonByIdBodySchema>,
   ) {
     const person = await this.personRepository.getById(id);
     person.updateProfile(
@@ -66,19 +62,17 @@ export class PeopleService implements PeopleUseCase {
     await this.personRepository.delete(id);
   }
 
-  async getPaginatedPeople(
-    query: z.infer<typeof getPeopleQuerySchema>
-  ) {
+  async getPaginatedPeople(query: z.infer<typeof getPeopleQuerySchema>) {
     const searchParams = query.search ? { search: query.search } : {};
     const peopleCount = await this.personRepository.count(searchParams);
     const limit = query.pageSize ?? 10;
     const offset = (query.pageSize ?? 10) * ((query.pageNumber ?? 1) - 1);
     const people = await this.personRepository.getPaginated({
-      limit,  
+      limit,
       offset,
       ...searchParams,
     });
-    return {  
+    return {
       people,
       count: peopleCount,
     };

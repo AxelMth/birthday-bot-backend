@@ -1,4 +1,4 @@
-import { Application } from '../value-objects/application';
+import { Application } from "../value-objects/application";
 
 export class ContactMethod {
   constructor(

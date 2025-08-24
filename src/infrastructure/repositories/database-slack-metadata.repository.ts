@@ -1,32 +1,28 @@
-import { ContactMethodMetadataRepository } from '../../application/ports/output/metadata.repository';
-import { SlackMetadata } from '../../domain/value-objects/contact-method-metadata';
-import { db } from '../../db';
-import { slackMetadata } from '../../db/schema';
-import { eq } from 'drizzle-orm';
+import { ContactMethodMetadataRepository } from "../../application/ports/output/metadata.repository";
+import { SlackMetadata } from "../../domain/value-objects/contact-method-metadata";
+import { db } from "../../db";
+import { slackMetadata } from "../../db/schema";
+import { eq } from "drizzle-orm";
 
 export class SlackMetadataRepository
   implements ContactMethodMetadataRepository<SlackMetadata>
 {
   getMetadata(): Record<string, string> {
     return {
-        "channelId": "string",
-        "userId": "string",
-    }
+      channelId: "string",
+      userId: "string",
+    };
   }
 
-  async getById(
-    id: number
-  ): Promise<SlackMetadata> {
+  async getById(id: number): Promise<SlackMetadata> {
     const [metadata] = await db
-        .select()
-        .from(slackMetadata)
+      .select()
+      .from(slackMetadata)
       .where(eq(slackMetadata.id, id))
       .execute();
 
     if (!metadata) {
-      throw new Error(
-        `No slack metadata found for id ${id}`
-      );
+      throw new Error(`No slack metadata found for id ${id}`);
     }
 
     return {
@@ -36,10 +32,7 @@ export class SlackMetadataRepository
     };
   }
 
-  async upsert(
-    id: number,
-    metadata: SlackMetadata
-  ): Promise<void> {
+  async upsert(id: number, metadata: SlackMetadata): Promise<void> {
     await db
       .insert(slackMetadata)
       .values({

@@ -1,4 +1,4 @@
-import { ContactChannel } from '../value-objects/contact-info';
+import { ContactChannel } from "../value-objects/contact-info";
 
 export class Person {
   constructor(

@@ -1,19 +1,24 @@
-import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq, ilike } from 'drizzle-orm';
-import fs from 'node:fs/promises';
-import { contactMethods, people, peopleContactMethods, slackMetadata } from '../schema';
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/node-postgres";
+import { eq, ilike } from "drizzle-orm";
+import fs from "node:fs/promises";
+import {
+  contactMethods,
+  people,
+  peopleContactMethods,
+  slackMetadata,
+} from "../schema";
 
-const channelId = 'C0D9VG7M4';
+const channelId = "C0D9VG7M4";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
 function parseCsv(content: string): string[][] {
-  const lines = content.split(/\r?\n/).filter(l => l.length > 0);
+  const lines = content.split(/\r?\n/).filter((l) => l.length > 0);
   const rows: string[][] = [];
   for (const line of lines) {
     const row: string[] = [];
-    let field = '';
+    let field = "";
     let inQuotes = false;
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
@@ -24,15 +29,15 @@ function parseCsv(content: string): string[][] {
         } else {
           inQuotes = !inQuotes;
         }
-      } else if (ch === ',' && !inQuotes) {
+      } else if (ch === "," && !inQuotes) {
         row.push(field);
-        field = '';
+        field = "";
       } else {
         field += ch;
       }
     }
     row.push(field);
-    rows.push(row.map(v => v.trim()));
+    rows.push(row.map((v) => v.trim()));
   }
   return rows;
 }
@@ -40,25 +45,27 @@ function parseCsv(content: string): string[][] {
 async function main() {
   const csvPath =
     process.argv[2] ||
-    '/Users/axelmathieulegall/Desktop/Citron® Member Analytics Prior 30 Days - Aug 10, 2025 (1).csv';
+    "/Users/axelmathieulegall/Desktop/Citron® Member Analytics Prior 30 Days - Aug 10, 2025 (1).csv";
 
   if (!process.env.DATABASE_URL) {
-    throw new Error('DATABASE_URL env var is required');
+    throw new Error("DATABASE_URL env var is required");
   }
 
-  const content = await fs.readFile(csvPath, 'utf-8');
+  const content = await fs.readFile(csvPath, "utf-8");
   const rows = parseCsv(content);
   if (rows.length === 0) {
-    throw new Error('CSV appears empty');
+    throw new Error("CSV appears empty");
   }
 
   const header = rows[0];
-  const idxName = header.indexOf('Name');
-  const idxUserId = header.indexOf('User ID');
-  const idxDeactivated = header.indexOf('Deactivated date (UTC)');
+  const idxName = header.indexOf("Name");
+  const idxUserId = header.indexOf("User ID");
+  const idxDeactivated = header.indexOf("Deactivated date (UTC)");
 
   if (idxName < 0 || idxUserId < 0 || idxDeactivated < 0) {
-    throw new Error('CSV header must contain "Name", "User ID", "Deactivated date (UTC)"');
+    throw new Error(
+      'CSV header must contain "Name", "User ID", "Deactivated date (UTC)"',
+    );
   }
 
   let created = 0;
@@ -66,11 +73,10 @@ async function main() {
   let skipped = 0;
   let usersCreated = 0;
 
-
   const [cm] = await db
-  .select()
-  .from(contactMethods)
-  .where(eq(contactMethods.applicationName, 'slack'))
+    .select()
+    .from(contactMethods)
+    .where(eq(contactMethods.applicationName, "slack"));
 
   for (const row of rows.slice(1)) {
     const name = row[idxName];
@@ -93,7 +99,7 @@ async function main() {
       console.log(`Creating new person for "${name}"`);
       const insertedPerson = await db
         .insert(people)
-        .values({ 
+        .values({
           name,
         })
         .returning()
@@ -101,7 +107,7 @@ async function main() {
       person = insertedPerson;
       usersCreated++;
     }
-    
+
     const personId = person[0].id;
 
     const [sm] = await db
@@ -115,13 +121,20 @@ async function main() {
 
     await db
       .insert(peopleContactMethods)
-      .values({ personId, contactMethodId: cm.id, slackMetadataId: sm?.id ?? null })
-      .onConflictDoUpdate({
-        target: [peopleContactMethods.personId, peopleContactMethods.contactMethodId],
-        set: { 
-          slackMetadataId: sm?.id ?? null,
-         },
+      .values({
+        personId,
+        contactMethodId: cm.id,
+        slackMetadataId: sm?.id ?? null,
       })
+      .onConflictDoUpdate({
+        target: [
+          peopleContactMethods.personId,
+          peopleContactMethods.contactMethodId,
+        ],
+        set: {
+          slackMetadataId: sm?.id ?? null,
+        },
+      });
 
     if (sm) {
       // If we updated existing row, treat as updated; otherwise created
@@ -132,10 +145,12 @@ async function main() {
     }
   }
 
-  console.log(`Done. Created/updated: ${created + updated}, skipped: ${skipped}, users created: ${usersCreated}`);
+  console.log(
+    `Done. Created/updated: ${created + updated}, skipped: ${skipped}, users created: ${usersCreated}`,
+  );
 }
 
-main().catch(err => {
+main().catch((err) => {
   console.error(err);
   process.exit(1);
 });

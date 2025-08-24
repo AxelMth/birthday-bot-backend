@@ -1,22 +1,26 @@
-import { ContactMethod } from '../../../domain/entities/contact-method';
-import { ContactMethodMetadata } from '../../../domain/value-objects/contact-method-metadata';
+import { ContactMethod } from "../../../domain/entities/contact-method";
+import { ContactMethodMetadata } from "../../../domain/value-objects/contact-method-metadata";
 
 export interface PersonContactMethodRepository {
   getByPersonId(personId: number): Promise<{
     contactMethod: ContactMethod;
     contactMethodMetadata: ContactMethodMetadata[keyof ContactMethodMetadata];
   } | null>;
-  createContactMethod(personId: number, contactMethod: ContactMethod, metadataRelationId: number): Promise<{
+  createContactMethod(
+    personId: number,
+    contactMethod: ContactMethod,
+    metadataRelationId: number,
+  ): Promise<{
     contactMethod: ContactMethod;
     contactMethodMetadata: ContactMethodMetadata[keyof ContactMethodMetadata];
   }>;
-  updateContactMethodById(  
+  updateContactMethodById(
     personId: number,
     contactMethod: ContactMethod,
-    metadataRelationId: number
-  ): Promise<void>; 
+    metadataRelationId: number,
+  ): Promise<void>;
   updateContactMethodByPersonId(
     personId: number,
-    contactMethod: ContactMethod | null
+    contactMethod: ContactMethod | null,
   ): Promise<void>;
 }

@@ -1,8 +1,8 @@
-import 'dotenv/config';
-import { drizzle } from 'drizzle-orm/node-postgres';
+import "dotenv/config";
+import { drizzle } from "drizzle-orm/node-postgres";
 
-import { people } from '../schema';
-import { eq } from 'drizzle-orm';
+import { people } from "../schema";
+import { eq } from "drizzle-orm";
 
 const db = drizzle(process.env.DATABASE_URL!);
 
@@ -12,7 +12,7 @@ async function main() {
     .execute()
     .then(async (_users) => {
       for (const user of _users) {
-        const [date, month, year] = user.birthDate.split('/').map(Number);
+        const [date, month, year] = user.birthDate.split("/").map(Number);
         await db
           .update(people)
           .set({

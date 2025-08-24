@@ -1,14 +1,21 @@
-import { sql, count, eq, and, inArray } from 'drizzle-orm';
+import { sql, count, eq, and, inArray } from "drizzle-orm";
 
-import { PersonRepository } from '../../application/ports/output/person.repository';
-import { db } from '../../db';
-import { people, contactMethods, peopleContactMethods, slackMetadata } from '../../db/schema';
-import { Person } from '../../domain/entities/person';
-import { Application } from '../../domain/value-objects/application';
-import { ContactChannel } from '../../domain/value-objects/contact-info';
+import { PersonRepository } from "../../application/ports/output/person.repository";
+import { db } from "../../db";
+import {
+  people,
+  contactMethods,
+  peopleContactMethods,
+  slackMetadata,
+} from "../../db/schema";
+import { Person } from "../../domain/entities/person";
+import { Application } from "../../domain/value-objects/application";
+import { ContactChannel } from "../../domain/value-objects/contact-info";
 
 export class DatabasePersonRepository implements PersonRepository {
-  private async hydratePersonWithContactChannel(personId: number): Promise<Person> {
+  private async hydratePersonWithContactChannel(
+    personId: number,
+  ): Promise<Person> {
     const [result] = await db
       .select({
         personId: people.id,
@@ -19,21 +26,34 @@ export class DatabasePersonRepository implements PersonRepository {
         slackUserId: slackMetadata.slackUserId,
       })
       .from(people)
-      .leftJoin(peopleContactMethods, eq(people.id, peopleContactMethods.personId))
-      .leftJoin(contactMethods, eq(peopleContactMethods.contactMethodId, contactMethods.id))
-      .leftJoin(slackMetadata, eq(peopleContactMethods.slackMetadataId, slackMetadata.id))
+      .leftJoin(
+        peopleContactMethods,
+        eq(people.id, peopleContactMethods.personId),
+      )
+      .leftJoin(
+        contactMethods,
+        eq(peopleContactMethods.contactMethodId, contactMethods.id),
+      )
+      .leftJoin(
+        slackMetadata,
+        eq(peopleContactMethods.slackMetadataId, slackMetadata.id),
+      )
       .where(eq(people.id, personId));
 
     if (!result) {
       throw new Error(`Person with id ${personId} not found`);
     }
 
-    const birthDate = result.personBirthDate 
-      ? new Date(result.personBirthDate + 'T00:00:00.000Z') 
+    const birthDate = result.personBirthDate
+      ? new Date(result.personBirthDate + "T00:00:00.000Z")
       : undefined;
 
     let preferredContact: ContactChannel | undefined;
-    if (result.applicationName === Application.Slack && result.channelId && result.slackUserId) {
+    if (
+      result.applicationName === Application.Slack &&
+      result.channelId &&
+      result.slackUserId
+    ) {
       preferredContact = {
         kind: Application.Slack,
         info: {
@@ -48,7 +68,9 @@ export class DatabasePersonRepository implements PersonRepository {
     return person;
   }
 
-  private async hydrateMultiplePersonsWithContactChannels(personIds: number[]): Promise<Person[]> {
+  private async hydrateMultiplePersonsWithContactChannels(
+    personIds: number[],
+  ): Promise<Person[]> {
     if (personIds.length === 0) return [];
 
     const results = await db
@@ -61,20 +83,33 @@ export class DatabasePersonRepository implements PersonRepository {
         slackUserId: slackMetadata.slackUserId,
       })
       .from(people)
-      .leftJoin(peopleContactMethods, eq(people.id, peopleContactMethods.personId))
-      .leftJoin(contactMethods, eq(peopleContactMethods.contactMethodId, contactMethods.id))
-      .leftJoin(slackMetadata, eq(peopleContactMethods.slackMetadataId, slackMetadata.id))
+      .leftJoin(
+        peopleContactMethods,
+        eq(people.id, peopleContactMethods.personId),
+      )
+      .leftJoin(
+        contactMethods,
+        eq(peopleContactMethods.contactMethodId, contactMethods.id),
+      )
+      .leftJoin(
+        slackMetadata,
+        eq(peopleContactMethods.slackMetadataId, slackMetadata.id),
+      )
       .where(inArray(people.id, personIds));
 
     const personsMap = new Map<number, Person>();
 
     for (const result of results) {
-      const birthDate = result.personBirthDate 
-        ? new Date(result.personBirthDate + 'T00:00:00.000Z') 
+      const birthDate = result.personBirthDate
+        ? new Date(result.personBirthDate + "T00:00:00.000Z")
         : undefined;
 
       let preferredContact: ContactChannel | undefined;
-      if (result.applicationName === Application.Slack && result.channelId && result.slackUserId) {
+      if (
+        result.applicationName === Application.Slack &&
+        result.channelId &&
+        result.slackUserId
+      ) {
         preferredContact = {
           kind: Application.Slack,
           info: {
@@ -90,25 +125,29 @@ export class DatabasePersonRepository implements PersonRepository {
     }
 
     // Return in original order
-    return personIds.map(id => personsMap.get(id)!).filter(Boolean);
+    return personIds.map((id) => personsMap.get(id)!).filter(Boolean);
   }
 
   async getById(id: number): Promise<Person> {
     return await this.hydratePersonWithContactChannel(id);
   }
 
-  async getPaginated(params: { search?: string; limit: number; offset: number }): Promise<Person[]> {
+  async getPaginated(params: {
+    search?: string;
+    limit: number;
+    offset: number;
+  }): Promise<Person[]> {
     const peopleRows = await db
       .select({ id: people.id })
       .from(people)
-      .where( 
-        params.search ? sql`name ILIKE ${`%${params.search}%`}` : undefined
+      .where(
+        params.search ? sql`name ILIKE ${`%${params.search}%`}` : undefined,
       )
       .limit(params.limit)
       .offset(params.offset)
       .orderBy(people.name);
-    
-    const personIds = peopleRows.map(row => row.id);
+
+    const personIds = peopleRows.map((row) => row.id);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);
   }
 
@@ -116,8 +155,8 @@ export class DatabasePersonRepository implements PersonRepository {
     const [{ count: counter }] = await db
       .select({ count: count() })
       .from(people)
-      .where( 
-        params.search ? sql`name ILIKE ${`%${params.search}%`}` : undefined
+      .where(
+        params.search ? sql`name ILIKE ${`%${params.search}%`}` : undefined,
       );
     return counter;
   }
@@ -129,10 +168,10 @@ export class DatabasePersonRepository implements PersonRepository {
       .select({ id: people.id })
       .from(people)
       .where(
-        sql`date_part('day', "birthDate") = ${day} and date_part('month', "birthDate") = ${month}`
+        sql`date_part('day', "birthDate") = ${day} and date_part('month', "birthDate") = ${month}`,
       );
-    
-    const personIds = peopleRows.map(row => row.id);
+
+    const personIds = peopleRows.map((row) => row.id);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);
   }
 
@@ -145,10 +184,10 @@ export class DatabasePersonRepository implements PersonRepository {
       .select({ id: people.id })
       .from(people)
       .where(
-        sql`date_part('day', "birthDate") >= ${startDay} and date_part('month', "birthDate") >= ${startMonth} and date_part('day', "birthDate") <= ${endDay} and date_part('month', "birthDate") <= ${endMonth}`
+        sql`date_part('day', "birthDate") >= ${startDay} and date_part('month', "birthDate") >= ${startMonth} and date_part('day', "birthDate") <= ${endDay} and date_part('month', "birthDate") <= ${endMonth}`,
       );
-    
-    const personIds = peopleRows.map(row => row.id);
+
+    const personIds = peopleRows.map((row) => row.id);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);
   }
 
@@ -159,19 +198,20 @@ export class DatabasePersonRepository implements PersonRepository {
         name: person.name,
       };
       if (person.birthDate !== undefined) {
-        updateData.birthDate = person.birthDate ? person.birthDate.toISOString().split('T')[0] : null;
+        updateData.birthDate = person.birthDate
+          ? person.birthDate.toISOString().split("T")[0]
+          : null;
       }
-      await tx
-        .update(people)
-        .set(updateData)
-        .where(eq(people.id, person.id));
+      await tx.update(people).set(updateData).where(eq(people.id, person.id));
 
       // Handle preferred contact
       if (person.preferredContact) {
         await this.upsertContactChannel(tx, person.id, person.preferredContact);
       } else {
         // Remove any existing contact method
-        await tx.delete(peopleContactMethods).where(eq(peopleContactMethods.personId, person.id));
+        await tx
+          .delete(peopleContactMethods)
+          .where(eq(peopleContactMethods.personId, person.id));
       }
     });
   }
@@ -183,18 +223,28 @@ export class DatabasePersonRepository implements PersonRepository {
         name: person.name,
       };
       if (person.birthDate !== undefined) {
-        insertData.birthDate = person.birthDate ? person.birthDate.toISOString().split('T')[0] : null;
+        insertData.birthDate = person.birthDate
+          ? person.birthDate.toISOString().split("T")[0]
+          : null;
       }
       const [createdPerson] = await tx
         .insert(people)
         .values(insertData)
         .returning({ id: people.id });
 
-      const newPerson = new Person(createdPerson.id, person.name, person.birthDate);
+      const newPerson = new Person(
+        createdPerson.id,
+        person.name,
+        person.birthDate,
+      );
 
       // Handle preferred contact
       if (person.preferredContact) {
-        await this.upsertContactChannel(tx, createdPerson.id, person.preferredContact);
+        await this.upsertContactChannel(
+          tx,
+          createdPerson.id,
+          person.preferredContact,
+        );
         newPerson.setPreferredContact(person.preferredContact);
       }
 
@@ -206,7 +256,11 @@ export class DatabasePersonRepository implements PersonRepository {
     await db.delete(people).where(eq(people.id, id));
   }
 
-  private async upsertContactChannel(tx: any, personId: number, contactChannel: ContactChannel): Promise<void> {
+  private async upsertContactChannel(
+    tx: any,
+    personId: number,
+    contactChannel: ContactChannel,
+  ): Promise<void> {
     if (contactChannel.kind === Application.Slack) {
       // Get or create contact method id
       const [contactMethodRow] = await tx
@@ -215,7 +269,7 @@ export class DatabasePersonRepository implements PersonRepository {
         .where(eq(contactMethods.applicationName, Application.Slack));
 
       if (!contactMethodRow) {
-        throw new Error('Slack contact method not found in database');
+        throw new Error("Slack contact method not found in database");
       }
 
       // Upsert slack metadata
@@ -229,7 +283,7 @@ export class DatabasePersonRepository implements PersonRepository {
         .returning({ id: slackMetadata.id });
 
       let metadataId = slackMetadataRow?.id;
-      
+
       if (!metadataId) {
         // Find existing metadata
         const [existing] = await tx
@@ -238,14 +292,14 @@ export class DatabasePersonRepository implements PersonRepository {
           .where(
             and(
               eq(slackMetadata.channelId, contactChannel.info.channelId),
-              eq(slackMetadata.slackUserId, contactChannel.info.userId)
-            )
+              eq(slackMetadata.slackUserId, contactChannel.info.userId),
+            ),
           );
         metadataId = existing?.id;
       }
 
       if (!metadataId) {
-        throw new Error('Failed to create or find slack metadata');
+        throw new Error("Failed to create or find slack metadata");
       }
 
       // Upsert people_contact_methods
@@ -257,7 +311,10 @@ export class DatabasePersonRepository implements PersonRepository {
           slackMetadataId: metadataId,
         })
         .onConflictDoUpdate({
-          target: [peopleContactMethods.personId, peopleContactMethods.contactMethodId],
+          target: [
+            peopleContactMethods.personId,
+            peopleContactMethods.contactMethodId,
+          ],
           set: {
             slackMetadataId: metadataId,
           },
