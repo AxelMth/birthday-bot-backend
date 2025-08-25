@@ -2,6 +2,7 @@ import { Person } from "../../../domain/entities/person";
 
 export interface PersonRepository {
   getById(id: number): Promise<Person>;
+  getByIds(ids: number[]): Promise<Person[]>;
   getPaginated(params: {
     search?: string;
     limit: number;

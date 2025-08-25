@@ -132,6 +132,10 @@ export class DatabasePersonRepository implements PersonRepository {
     return await this.hydratePersonWithContactChannel(id);
   }
 
+  async getByIds(ids: number[]): Promise<Person[]> {
+    return await this.hydrateMultiplePersonsWithContactChannels(ids);
+  }
+
   async getPaginated(params: {
     search?: string;
     limit: number;

@@ -7,6 +7,7 @@ import {
   birthdayRouter,
   peopleRouter,
   contactMethodsRouter,
+  communicationRouter,
 } from "./presentation/routers";
 
 const host = process.env.HOST ?? "localhost";
@@ -17,23 +18,6 @@ const server = Fastify({
   logger: true,
 });
 
-// Allow empty JSON bodies
-server.addContentTypeParser("application/json", { parseAs: "string" }, function (
-  req,
-  body,
-  done,
-) {
-  if (!body || body.toString().trim() === "") {
-    return done(null, {}); // treat empty body as empty object
-  }
-  try {
-    done(null, JSON.parse(body.toString()));
-  } catch (err) {
-    done(err);
-  }
-});
-
-// Add error handler to ignore empty body errors on DELETE requests
 server.setErrorHandler((error, request, reply) => {
   // For all other errors, use default error handling
   server.log.error(error);
@@ -69,6 +53,7 @@ const s = initServer();
 server.register(s.plugin(birthdayRouter));
 server.register(s.plugin(peopleRouter));
 server.register(s.plugin(contactMethodsRouter));
+server.register(s.plugin(communicationRouter));
 
 // Start listening.
 server.listen({ port, host }, (err) => {

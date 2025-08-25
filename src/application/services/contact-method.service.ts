@@ -10,7 +10,7 @@ export class ContactMethodService implements ContactMethodUseCase {
 
   async getAllContactMethods(): Promise<ContactMethod[]> {
     const contactMethods =
-      await this.contactMethodRepository.getAllContactMethods();
+      await this.contactMethodRepository.getAll();
     const uniqueApplicationNames = [
       ...new Set(
         contactMethods.map((contactMethod) => contactMethod.applicationName),
