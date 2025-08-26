@@ -188,12 +188,20 @@ export class DatabasePersonRepository implements PersonRepository {
     const startMonth = start.getMonth() + 1;
     const endDay = end.getDate();
     const endMonth = end.getMonth() + 1;
+
+    const startMD = startMonth * 100 + startDay;
+    const endMD = endMonth * 100 + endDay;
+
+    const mdExpr = sql`(date_part('month', "birthDate")::int * 100 + date_part('day', "birthDate")::int)`;
+    const whereClause =
+      endMD >= startMD
+        ? sql`${mdExpr} >= ${startMD} and ${mdExpr} <= ${endMD}`
+        : sql`${mdExpr} >= ${startMD} or ${mdExpr} <= ${endMD}`;
+
     const peopleRows = await db
       .select({ id: people.id })
       .from(people)
-      .where(
-        sql`date_part('day', "birthDate") >= ${startDay} and date_part('month', "birthDate") >= ${startMonth} and date_part('day', "birthDate") <= ${endDay} and date_part('month', "birthDate") <= ${endMonth}`,
-      );
+      .where(whereClause);
 
     const personIds = peopleRows.map((row) => row.id);
     return await this.hydrateMultiplePersonsWithContactChannels(personIds);

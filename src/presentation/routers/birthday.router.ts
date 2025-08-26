@@ -6,6 +6,7 @@ import { SlackBirthdayMessageRepository } from "../../infrastructure/repositorie
 import { BirthdayService } from "../../application/services/birthday.service";
 import { DatabaseContactMethodRepository } from "../../infrastructure/repositories/database-contact-method.repository";
 import { DatabaseCommunicationRepository } from "../../infrastructure/repositories/database-communication.repository";
+import { Application } from "../../domain/value-objects/application";
 
 const s = initServer();
 
@@ -24,6 +25,33 @@ const birthdayService = new BirthdayService(
   databaseContactMethodRepository,
   databaseCommunicationRepository,
 );
+
+
+// Factorize to a shared function
+function toPersonDTO(person: any) {
+  let application: string | undefined;
+  let applicationMetadata: Record<string, string> | undefined;
+
+  if (person.preferredContact) {
+    switch (person.preferredContact.kind) {
+      case Application.Slack:
+        application = Application.Slack;
+        applicationMetadata = {
+          channelId: person.preferredContact.info.channelId,
+          userId: person.preferredContact.info.userId,
+        };
+        break;
+    }
+  }
+
+  return {
+    id: person.id,
+    name: person.name,
+    birthDate: person.birthDate?.toISOString().split("T")[0],
+    application,
+    applicationMetadata,
+  };
+}
 
 export const birthdayRouter = s.router(birthdayContract, {
   sendTodayBirthdayMessages: async () => {
@@ -47,7 +75,7 @@ export const birthdayRouter = s.router(birthdayContract, {
     return {
       status: 200,
       body: {
-        people,
+        people: people.map(toPersonDTO),
       },
     };
   },
