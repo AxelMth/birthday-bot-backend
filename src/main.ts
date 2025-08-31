@@ -8,6 +8,7 @@ import {
   peopleRouter,
   contactMethodsRouter,
   communicationRouter,
+  authRouter,
 } from "./presentation/routers";
 
 const host = process.env.HOST ?? "localhost";
@@ -54,6 +55,7 @@ server.register(s.plugin(birthdayRouter));
 server.register(s.plugin(peopleRouter));
 server.register(s.plugin(contactMethodsRouter));
 server.register(s.plugin(communicationRouter));
+server.register(s.plugin(authRouter));
 
 // Start listening.
 server.listen({ port, host }, (err) => {
