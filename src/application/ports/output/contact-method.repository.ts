@@ -5,4 +5,5 @@ export interface ContactMethodRepository {
   getAll(): Promise<ContactMethod[]>;
   getByIds(ids: number[]): Promise<ContactMethod[]>;
   getByApplication(application: Application): Promise<ContactMethod>;
+  
 }

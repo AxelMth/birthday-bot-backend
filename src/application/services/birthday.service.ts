@@ -98,7 +98,7 @@ export class BirthdayService implements BirthdayUseCase {
       const randomMessage = this.getRandomBirthdayMessage();
       const formattedMessage = this.formatMessage(randomMessage, person);
 
-      const contactMethod = await this.contactMethodRepository.getContactMethodByApplication(person.preferredContact.kind);
+      const contactMethod = await this.contactMethodRepository.getByApplication(person.preferredContact.kind);
 
       if (person.preferredContact.kind === Application.Slack) {
         const slackMetadata = {
