@@ -1,0 +1,55 @@
+name: Keep Repository Active
+
+on:
+  schedule:
+    # Run every month (GitHub disables workflows after 60 days of inactivity)
+    - cron: "0 0 1 * *"  # Every month (approx. 30 days)
+  workflow_dispatch: # Allow manual triggering
+
+jobs:
+  keep-alive:
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+          
+      - name: Configure Git
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+      - name: Update activity timestamp
+        run: |
+          # Create or update a timestamp file to show repository activity
+          mkdir -p .github
+          echo "Last activity: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" > .github/LAST_ACTIVITY
+          echo "Workflow run: ${{ github.run_number }}" >> .github/LAST_ACTIVITY
+          echo "Repository: ${{ github.repository }}" >> .github/LAST_ACTIVITY
+          
+      - name: Check for changes
+        id: verify-changed-files
+        run: |
+          if git diff --quiet; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            echo "changed=true" >> $GITHUB_OUTPUT
+          fi
+          
+      - name: Commit and push changes
+        if: steps.verify-changed-files.outputs.changed == 'true'
+        run: |
+          git add .github/LAST_ACTIVITY
+          git commit -m "chore: update activity timestamp to keep repository active [skip ci]"
+          git push
+          
+      - name: No changes detected
+        if: steps.verify-changed-files.outputs.changed == 'false'
+        run: |
+          echo "No changes detected. Repository activity timestamp is up to date."
