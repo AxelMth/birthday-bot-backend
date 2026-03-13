@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   date,
   integer,
+  jsonb,
   pgTable,
   varchar,
   pgEnum,
@@ -16,23 +17,28 @@ export const contactMethodApplicationEnum = pgEnum(
   ["slack", "email", "phone", "sms", "whatsapp", "telegram"],
 );
 
-export const groupTypeEnum = pgEnum("group_type", [
-  "family",
-  "work",
-  "friends",
-  "other",
-]);
-
-// Tables
-export const people = pgTable("people", {
+// Tables (ordered to avoid forward references)
+export const groups = pgTable("groups", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  birthDate: date(),
+  name: varchar({ length: 255 }).notNull().unique(),
+});
+
+export const slackMetadata = pgTable("slack_metadata", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  channelId: varchar({ length: 255 }).notNull(),
+  slackUserId: varchar({ length: 255 }).notNull(),
 });
 
 export const contactMethods = pgTable("contact_methods", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   applicationName: contactMethodApplicationEnum().notNull().unique(),
+});
+
+export const people = pgTable("people", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  name: varchar({ length: 255 }).notNull(),
+  birthDate: date(),
+  groupId: integer().references(() => groups.id, { onDelete: "set null" }),
 });
 
 export const peopleContactMethods = pgTable(
@@ -57,28 +63,28 @@ export const peopleContactMethods = pgTable(
   }),
 );
 
-export const slackMetadata = pgTable("slack_metadata", {
+export const groupConnectors = pgTable(
+  "group_connectors",
+  {
+    id: integer().primaryKey().generatedAlwaysAsIdentity(),
+    groupId: integer()
+      .notNull()
+      .references(() => groups.id, { onDelete: "cascade" }),
+    integrationType: contactMethodApplicationEnum().notNull(),
+    config: jsonb().$type<Record<string, unknown>>().notNull().default({}),
+  },
+  (table) => ({
+    uniqueGroupIntegration: unique().on(table.groupId, table.integrationType),
+  }),
+);
+
+export const adminUsers = pgTable("admin_users", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  channelId: varchar({ length: 255 }).notNull(),
-  slackUserId: varchar({ length: 255 }).notNull(),
+  username: varchar({ length: 255 }).notNull().unique(),
+  passwordHash: varchar({ length: 255 }).notNull(),
 });
 
-export const groups = pgTable("groups", {
-  id: integer().primaryKey().generatedAlwaysAsIdentity(),
-  name: varchar({ length: 255 }).notNull(),
-  type: groupTypeEnum().notNull().default("other"),
-});
-
-export const peopleGroups = pgTable("people_groups", {
-  personId: integer()
-    .notNull()
-    .references(() => people.id, { onDelete: "cascade" }),
-  groupId: integer()
-    .notNull()
-    .references(() => groups.id, { onDelete: "cascade" }),
-});
-
-export const communications  = pgTable("communications", {
+export const communications = pgTable("communications", {
   id: integer().primaryKey().generatedAlwaysAsIdentity(),
   personId: integer()
     .notNull()
@@ -93,13 +99,27 @@ export const communications  = pgTable("communications", {
 // Relations
 export const peopleRelations = relations(people, ({ many, one }) => ({
   contactMethod: one(peopleContactMethods),
-  groups: many(peopleGroups),
+  group: one(groups, {
+    fields: [people.groupId],
+    references: [groups.id],
+  }),
   communications: many(communications),
 }));
 
 export const groupRelations = relations(groups, ({ many }) => ({
-  people: many(peopleGroups),
+  people: many(people),
+  connectors: many(groupConnectors),
 }));
+
+export const groupConnectorRelations = relations(
+  groupConnectors,
+  ({ one }) => ({
+    group: one(groups, {
+      fields: [groupConnectors.groupId],
+      references: [groups.id],
+    }),
+  }),
+);
 
 export const peopleContactMethodRelations = relations(
   peopleContactMethods,

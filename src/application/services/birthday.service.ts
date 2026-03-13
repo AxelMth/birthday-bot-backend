@@ -2,6 +2,7 @@ import { BirthdayUseCase } from "../ports/input/birthday.use-case";
 import { BirthdayMessageRepository } from "../ports/output/message.repository";
 import { PersonRepository } from "../ports/output/person.repository";
 import { CommunicationRepository } from "../ports/output/communication.repository";
+import { ConnectorConfigRepository } from "../ports/output/connector-config.repository";
 import { Application } from "../../domain/value-objects/application";
 import { Person } from "../../domain/entities/person";
 import { ContactMethodRepository } from "../ports/output/contact-method.repository";
@@ -33,6 +34,7 @@ export class BirthdayService implements BirthdayUseCase {
     private readonly personRepository: PersonRepository,
     private readonly contactMethodRepository: ContactMethodRepository,
     private readonly communicationRepository: CommunicationRepository,
+    private readonly connectorConfigRepository: ConnectorConfigRepository,
   ) {}
 
   private getRandomBirthdayMessage(): string {
@@ -43,7 +45,6 @@ export class BirthdayService implements BirthdayUseCase {
   }
 
   private formatMessage(message: string, person: Person): string {
-    // For Slack messages, let the Slack repository handle {name} replacement
     if (person.preferredContact?.kind === Application.Slack) {
       return message;
     }
@@ -61,35 +62,76 @@ export class BirthdayService implements BirthdayUseCase {
   }> {
     const people = await this.personRepository.getByBirthday(new Date());
     if (people.length === 0) {
-      console.log("🎂 No birthdays today");
+      console.log("No birthdays today");
       return {
         birthdayMessageCount: 0,
       };
     }
 
-    console.log(`🎉 Found ${people.length} birthday(s) today: ${people.map(p => p.name).join(', ')}`);
-    
+    console.log(
+      `Found ${people.length} birthday(s) today: ${people.map((p) => p.name).join(", ")}`,
+    );
+
+    // Cache connector configs per groupId to avoid repeated DB lookups
+    const tokenCache = new Map<string, string>();
+
     let birthdayMessageCount = 0;
 
     for (const person of people) {
       if (!person.preferredContact) {
-        const errorMsg = `No contact method found for person ${person.id}`;
-        console.error(`❌ ${errorMsg}`);
+        console.error(`No contact method found for person ${person.id}`);
+        continue;
+      }
+
+      if (!person.groupId) {
+        console.error(
+          `No group assigned for person ${person.id} (${person.name}), skipping`,
+        );
         continue;
       }
 
       const messageRepository =
         this.messageRepositoriesByApplication[person.preferredContact.kind];
       if (!messageRepository) {
-        const errorMsg = `No message repository found for application ${person.preferredContact.kind}`;
-        console.error(`❌ ${errorMsg}`);
+        console.error(
+          `No message repository found for application ${person.preferredContact.kind}`,
+        );
         continue;
+      }
+
+      // Look up the token for this person's group + integration type
+      const cacheKey = `${person.groupId}:${person.preferredContact.kind}`;
+      let token = tokenCache.get(cacheKey);
+
+      if (!token) {
+        const connectorConfig =
+          await this.connectorConfigRepository.getByGroupAndType(
+            person.groupId,
+            person.preferredContact.kind,
+          );
+        if (!connectorConfig) {
+          console.error(
+            `No connector config found for group ${person.groupId} and type ${person.preferredContact.kind}`,
+          );
+          continue;
+        }
+        token = (connectorConfig.config as Record<string, string>).botToken;
+        if (!token) {
+          console.error(
+            `No botToken in connector config for group ${person.groupId}`,
+          );
+          continue;
+        }
+        tokenCache.set(cacheKey, token);
       }
 
       const randomMessage = this.getRandomBirthdayMessage();
       const formattedMessage = this.formatMessage(randomMessage, person);
 
-      const contactMethod = await this.contactMethodRepository.getByApplication(person.preferredContact.kind);
+      const contactMethod =
+        await this.contactMethodRepository.getByApplication(
+          person.preferredContact.kind,
+        );
 
       if (person.preferredContact.kind === Application.Slack) {
         const slackMetadata = {
@@ -97,21 +139,27 @@ export class BirthdayService implements BirthdayUseCase {
           channelId: person.preferredContact.info.channelId,
           userId: person.preferredContact.info.userId,
         };
-        
-        console.log(`📤 Sending birthday message to ${person.name} via Slack...`);
-        await messageRepository.sendMessage(formattedMessage, slackMetadata);
+
+        console.log(
+          `Sending birthday message to ${person.name} via Slack (group: ${person.groupName ?? person.groupId})...`,
+        );
+        await messageRepository.sendMessage(
+          formattedMessage,
+          slackMetadata,
+          token,
+        );
         await this.communicationRepository.create({
           personId: person.id,
           contactMethodId: contactMethod.id,
           message: formattedMessage,
         });
 
-        console.log(`✅ Birthday message sent successfully to ${person.name}`);
+        console.log(`Birthday message sent successfully to ${person.name}`);
         birthdayMessageCount++;
       }
     }
 
-    console.log(`📱 Total attempts: ${people.length}`);
+    console.log(`Total attempts: ${people.length}`);
 
     return {
       birthdayMessageCount,

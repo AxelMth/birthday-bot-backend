@@ -10,7 +10,6 @@ const s = initServer();
 const databasePersonRepository = new DatabasePersonRepository();
 const peopleService = new PeopleService(databasePersonRepository);
 
-// Helper function to convert domain to DTO
 function toPersonDTO(person: any) {
   let application: string | undefined;
   let applicationMetadata: Record<string, string> | undefined;
@@ -33,6 +32,8 @@ function toPersonDTO(person: any) {
     birthDate: person.birthDate?.toISOString().split("T")[0],
     application,
     applicationMetadata,
+    groupId: person.groupId,
+    groupName: person.groupName,
   };
 }
 

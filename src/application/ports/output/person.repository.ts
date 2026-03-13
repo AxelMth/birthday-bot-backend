@@ -9,11 +9,12 @@ export interface PersonRepository {
     offset: number;
     sort?: "birthDate" | "name";
     order?: "asc" | "desc";
+    groupId?: number;
   }): Promise<Person[]>;
-  count(params: { search?: string }): Promise<number>;
+  count(params: { search?: string; groupId?: number }): Promise<number>;
   getByBirthday(date: Date): Promise<Person[]>;
   getByBirthdayRange(start: Date, end: Date): Promise<Person[]>;
-  save(person: Person): Promise<void>; // upsert full aggregate (profile + preferredContact)
+  save(person: Person): Promise<void>;
   create(person: Person): Promise<Person>;
   delete(id: number): Promise<void>;
 }

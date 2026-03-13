@@ -38,6 +38,8 @@ export class PeopleService implements PeopleUseCase {
       0,
       personPayload.name!,
       personPayload.birthDate ? new Date(personPayload.birthDate) : undefined,
+      undefined,
+      personPayload.groupId ?? undefined,
     );
     person.setPreferredContact(this.toContactChannel(personPayload));
     const created = await this.personRepository.create(person);
@@ -53,6 +55,7 @@ export class PeopleService implements PeopleUseCase {
       personPayload.name!,
       personPayload.birthDate ? new Date(personPayload.birthDate) : undefined,
     );
+    person.groupId = personPayload.groupId ?? undefined;
     person.setPreferredContact(this.toContactChannel(personPayload));
     await this.personRepository.save(person);
     return await this.personRepository.getById(id);
@@ -64,7 +67,9 @@ export class PeopleService implements PeopleUseCase {
 
   async getPaginatedPeople(query: z.infer<typeof getPeopleQuerySchema>) {
     const searchParams = query.search ? { search: query.search } : {};
-    const peopleCount = await this.personRepository.count(searchParams);
+    const groupFilter = query.groupId ? { groupId: query.groupId } : {};
+    const countParams = { ...searchParams, ...groupFilter };
+    const peopleCount = await this.personRepository.count(countParams);
     const limit = query.pageSize ?? 10;
     const offset = (query.pageSize ?? 10) * ((query.pageNumber ?? 1) - 1);
     const sort = query.sortBy;
@@ -73,6 +78,7 @@ export class PeopleService implements PeopleUseCase {
       limit,
       offset,
       ...searchParams,
+      ...groupFilter,
       sort,
       order,
     });

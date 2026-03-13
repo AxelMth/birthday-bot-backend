@@ -125,7 +125,7 @@ async function main() {
         personId,
         contactMethodId: cm.id,
         slackMetadataId: sm?.id ?? null,
-      })
+      } as any)
       .onConflictDoUpdate({
         target: [
           peopleContactMethods.personId,
@@ -133,7 +133,7 @@ async function main() {
         ],
         set: {
           slackMetadataId: sm?.id ?? null,
-        },
+        } as any,
       });
 
     if (sm) {

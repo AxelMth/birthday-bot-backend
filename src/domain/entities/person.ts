@@ -6,6 +6,8 @@ export class Person {
     public name: string,
     public birthDate?: Date,
     private _preferredContact?: ContactChannel,
+    public groupId?: number,
+    public groupName?: string,
   ) {}
 
   get preferredContact(): ContactChannel | undefined {
@@ -13,7 +15,6 @@ export class Person {
   }
 
   setPreferredContact(channel: ContactChannel | undefined) {
-    // Add domain invariants if any (e.g., slack requires both ids)
     this._preferredContact = channel;
   }
 
